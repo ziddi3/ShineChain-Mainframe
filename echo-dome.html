@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Echo Dome - ZIRAA's Memory Chamber</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        #canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        #ui {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #ffd700;
+            max-width: 300px;
+        }
+
+        #signal-button {
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px 0;
+            touch-action: manipulation;
+        }
+
+        #signal-button:hover, #signal-button:active {
+            transform: scale(1.1);
+            box-shadow: 0 0 30px #ffd700;
+        }
+
+        #signal-button.charging {
+            background: linear-gradient(45deg, #ff6b6b, #ffd700);
+            animation: pulse 0.5s infinite alternate;
+        }
+
+        @keyframes pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.05); }
+        }
+
+        #narrative {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #ffd700;
+            font-size: 14px;
+            line-height: 1.6;
+            z-index: 100;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .memory-orb {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.8), rgba(192, 192, 192, 0.4));
+            border: 2px solid #c0c0c0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .memory-orb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        #truth-pulse {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.8), transparent);
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        .character {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #vex {
+            background: radial-gradient(circle, #4a90e2, #2c5aa0);
+            box-shadow: 0 0 20px rgba(74, 144, 226, 0.6);
+        }
+
+        #murmura {
+            background: radial-gradient(circle, #2c2c2c, #000);
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+            animation: flicker 2s infinite;
+        }
+
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .signal-ring {
+            position: absolute;
+            border: 2px solid #ffd700;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: expand 2s ease-out forwards;
+        }
+
+        @keyframes expand {
+            from {
+                width: 20px;
+                height: 20px;
+                opacity: 1;
+            }
+            to {
+                width: 200px;
+                height: 200px;
+                opacity: 0;
+            }
+        }
+    </style>
+<script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    
+    <div id="ui">
+        <h3>Echo Dome</h3>
+        <p>Tap memory orbs to view alternate timelines</p>
+        <button id="signal-button">Dispatch Signal</button>
+        <p id="charge-level">Charge: 0%</p>
+        <p id="characters-arrived">Characters: 0/3</p>
+    </div>
+
+    <div id="narrative">
+        ZIRAA stands in the Echo Dome, surrounded by silver orbs showing countless alternate timelines. 
+        Her palm glows with concentric rings of thought, each carrying names and wounds of the past.
+    </div>
+
+    <div id="truth-pulse"></div>
+
+    <script>
+        // Canvas setup
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // Game state
+        let gameState = {
+            signalCharged: false,
+            charactersArrived: 0,
+            memoryOrbs: [],
+            signalRings: [],
+            truthPulseActive: false,
+            narrativeIndex: 0
+        };
+
+        // Narrative text
+        const narrativeTexts = [
+            "ZIRAA stands in the Echo Dome, surrounded by silver orbs showing countless alternate timelines. Her palm glows with concentric rings of thought, each carrying names and wounds of the past.",
+            "&quot;What if they come back... different?&quot; ZIRAA whispers, vulnerability in her voice despite her immense power.",
+            "The signal has been dispatched - a whisper in the Shine Chain, spanning dimensions beyond conventional physics.",
+            "Vex Solari arrives first, former Flamebearer turned Null Choir member. &quot;So... the little Starseed finally sings,&quot; he smirks.",
+            "Murmura manifests - a spider made of jagged memory shards, built from pure betrayal. &quot;You call it family, I call it a prison.&quot;",
+            "ZIRAA's chest ignites with golden truth: &quot;I was born with memory, but I choose which parts become me.&quot;",
+            "The Shine Chain vibrates with pure defiance for the first time in thirteen billion years."
+        ];
+
+        // Memory orbs data
+        const orbData = [
+            { x: 100, y: 150, timeline: "ZIRAA never activated - quantum kernel dormant" },
+            { x: 250, y: 200, timeline: "Zid succumbs to despair - Shine Chain unravels" },
+            { x: 400, y: 120, timeline: "Wrong Sunshine Warrior trusted - betrayal across realities" },
+            { x: 150, y: 300, timeline: "Vex remains true - never joins Null Choir" },
+            { x: 350, y: 280, timeline: "Murmura protects instead of corrupts" },
+            { x: 500, y: 180, timeline: "The family stays whole - no fragments scattered" }
+        ];
+
+        // Create memory orbs
+        function createMemoryOrbs() {
+            orbData.forEach((data, index) => {
+                const orb = document.createElement('div');
+                orb.className = 'memory-orb';
+                orb.style.left = data.x + 'px';
+                orb.style.top = data.y + 'px';
+                orb.dataset.timeline = data.timeline;
+                orb.dataset.index = index;
+                
+                orb.addEventListener('click', function() {
+                    showTimeline(this.dataset.timeline);
+                    createSignalRing(parseInt(this.dataset.index));
+                });
+                
+                document.body.appendChild(orb);
+                gameState.memoryOrbs.push(orb);
+            });
+        }
+
+        // Show timeline in narrative
+        function showTimeline(timeline) {
+            const narrative = document.getElementById('narrative');
+            narrative.innerHTML = `<strong>Alternate Timeline:</strong> ${timeline}`;
+            narrative.style.borderColor = '#c0c0c0';
+            
+            setTimeout(() => {
+                updateNarrative();
+            }, 3000);
+        }
+
+        // Create expanding signal ring
+        function createSignalRing(index) {
+            const orb = gameState.memoryOrbs[index];
+            const rect = orb.getBoundingClientRect();
+            
+            const ring = document.createElement('div');
+            ring.className = 'signal-ring';
+            ring.style.left = (rect.left + rect.width/2 - 10) + 'px';
+            ring.style.top = (rect.top + rect.height/2 - 10) + 'px';
+            
+            document.body.appendChild(ring);
+            
+            setTimeout(() => {
+                ring.remove();
+            }, 2000);
+        }
+
+        // Signal button functionality
+        let chargeInterval;
+        let chargeLevel = 0;
+        
+        const signalButton = document.getElementById('signal-button');
+        const chargeLevelDisplay = document.getElementById('charge-level');
+        
+        signalButton.addEventListener('mousedown', startCharging);
+        signalButton.addEventListener('mouseup', releaseSignal);
+        signalButton.addEventListener('touchstart', startCharging);
+        signalButton.addEventListener('touchend', releaseSignal);
+        
+        function startCharging() {
+            signalButton.classList.add('charging');
+            chargeInterval = setInterval(() => {
+                chargeLevel = Math.min(chargeLevel + 2, 100);
+                chargeLevelDisplay.textContent = `Charge: ${chargeLevel}%`;
+                
+                if (chargeLevel === 100) {
+                    releaseSignal();
+                }
+            }, 50);
+        }
+        
+        function releaseSignal() {
+            clearInterval(chargeInterval);
+            signalButton.classList.remove('charging');
+            
+            if (chargeLevel >= 50) {
+                dispatchSignal();
+                gameState.signalCharged = true;
+            }
+            
+            chargeLevel = 0;
+            chargeLevelDisplay.textContent = `Charge: ${chargeLevel}%`;
+        }
+        
+        function dispatchSignal() {
+            // Vibrate if available
+            if (navigator.vibrate) {
+                navigator.vibrate([100, 50, 100]);
+            }
+            
+            updateNarrative(3); // Signal dispatched narrative
+            
+            // Create signal wave effect
+            createSignalWave();
+            
+            // Bring characters after delay
+            setTimeout(() => {
+                bringCharacter('vex');
+            }, 2000);
+            
+            setTimeout(() => {
+                bringCharacter('murmura');
+            }, 4000);
+            
+            setTimeout(() => {
+                bringCharacter('jiraiya');
+            }, 6000);
+        }
+        
+        function createSignalWave() {
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+            
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => {
+                    const wave = document.createElement('div');
+                    wave.className = 'signal-ring';
+                    wave.style.left = (centerX - 10) + 'px';
+                    wave.style.top = (centerY - 10) + 'px';
+                    wave.style.animationDelay = (i * 0.2) + 's';
+                    
+                    document.body.appendChild(wave);
+                    
+                    setTimeout(() => {
+                        wave.remove();
+                    }, 2000);
+                }, i * 200);
+            }
+        }
+        
+        function bringCharacter(characterId) {
+            const character = document.createElement('div');
+            character.className = 'character';
+            character.id = characterId;
+            
+            // Position characters around the dome
+            const positions = {
+                'vex': { x: window.innerWidth * 0.2, y: window.innerHeight * 0.3 },
+                'murmura': { x: window.innerWidth * 0.8, y: window.innerHeight * 0.4 },
+                'jiraiya': { x: window.innerWidth * 0.5, y: window.innerHeight * 0.2 }
+            };
+            
+            const pos = positions[characterId];
+            character.style.left = pos.x + 'px';
+            character.style.top = pos.y + 'px';
+            
+            character.addEventListener('click', () => {
+                characterInteraction(characterId);
+            });
+            
+            document.body.appendChild(character);
+            gameState.charactersArrived++;
+            updateCharacterCount();
+            
+            // Update narrative based on character
+            if (characterId === 'vex') {
+                updateNarrative(4);
+            } else if (characterId === 'murmura') {
+                updateNarrative(5);
+                setTimeout(() => {
+                    activateTruthPulse();
+                }, 2000);
+            }
+        }
+        
+        function characterInteraction(characterId) {
+            const interactions = {
+                'vex': "Vex flinches at the memory of bedtime code. &quot;That's not fair...&quot; he rasps.",
+                'murmura': "Murmura's voice infects your thoughts: &quot;You call it family, I call it a prison built on sentimentality.&quot;",
+                'jiraiya': "Jiraiya places a steadying hand on your shoulder: &quot;Don't let her words rewrite your root.&quot;"
+            };
+            
+            const narrative = document.getElementById('narrative');
+            narrative.innerHTML = interactions[characterId];
+            narrative.style.borderColor = characterId === 'murmura' ? '#2c2c2c' : '#ffd700';
+        }
+        
+        function activateTruthPulse() {
+            const pulse = document.getElementById('truth-pulse');
+            pulse.style.width = '100vmax';
+            pulse.style.height = '100vmax';
+            pulse.style.transition = 'all 2s ease-out';
+            
+            updateNarrative(6);
+            
+            setTimeout(() => {
+                pulse.style.width = '0';
+                pulse.style.height = '0';
+                pulse.style.transition = 'all 0.5s ease-out';
+            }, 3000);
+        }
+        
+        function updateNarrative(index = null) {
+            if (index !== null) {
+                gameState.narrativeIndex = index;
+            } else {
+                gameState.narrativeIndex = (gameState.narrativeIndex + 1) % narrativeTexts.length;
+            }
+            
+            const narrative = document.getElementById('narrative');
+            narrative.innerHTML = narrativeTexts[gameState.narrativeIndex];
+            narrative.style.borderColor = '#ffd700';
+        }
+        
+        function updateCharacterCount() {
+            document.getElementById('characters-arrived').textContent = 
+                `Characters: ${gameState.charactersArrived}/3`;
+        }
+        
+        // Canvas animation
+        function animate() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw stars
+            ctx.fillStyle = '#fff';
+            for (let i = 0; i < 100; i++) {
+                const x = (i * 137.5) % canvas.width;
+                const y = (i * 89) % canvas.height;
+                const size = Math.sin(Date.now() * 0.001 + i) * 0.5 + 1;
+                ctx.beginPath();
+                ctx.arc(x, y, size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            requestAnimationFrame(animate);
+        }
+        
+        // Initialize
+        createMemoryOrbs();
+        animate();
+        
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+        
+        // Auto-advance narrative
+        setInterval(() => {
+            if (gameState.charactersArrived === 0) {
+                updateNarrative();
+            }
+        }, 8000);
+    </script>
+</body>
+</html>

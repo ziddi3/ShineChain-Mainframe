@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZIRAA: Born With Memory - Story Hub</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #000428 0%, #004e92 50%, #000428 100%);
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+            animation: fadeIn 1s ease-in;
+        }
+
+        h1 {
+            font-size: 3em;
+            background: linear-gradient(45deg, #ffd700, #ffed4e, #ffd700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            text-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+        }
+
+        .subtitle {
+            font-size: 1.5em;
+            color: #00ffff;
+            margin-bottom: 20px;
+        }
+
+        .intro {
+            max-width: 800px;
+            margin: 0 auto 40px;
+            line-height: 1.8;
+            font-size: 1.1em;
+            text-align: center;
+            color: #c0c0c0;
+        }
+
+        .story-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+
+        .story-card {
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid;
+            border-radius: 15px;
+            padding: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .story-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, transparent 0%, rgba(255, 255, 255, 0.1) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .story-card:hover::before {
+            opacity: 1;
+        }
+
+        .story-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 40px rgba(255, 215, 0, 0.3);
+        }
+
+        .part-1 { border-color: #ffd700; }
+        .part-2 { border-color: #ff8c00; }
+        .part-3 { border-color: #ff6347; }
+        .part-4 { border-color: #ff1493; }
+        .part-5 { border-color: #8a2be2; }
+        .part-6 { border-color: #00ffff; }
+
+        .story-card h2 {
+            font-size: 1.8em;
+            margin-bottom: 15px;
+            color: inherit;
+        }
+
+        .story-card .part-number {
+            font-size: 0.9em;
+            opacity: 0.7;
+            margin-bottom: 10px;
+        }
+
+        .story-card .description {
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: #c0c0c0;
+        }
+
+        .story-card .key-elements {
+            font-size: 0.9em;
+            opacity: 0.8;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .story-card .status {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            margin-top: 15px;
+        }
+
+        .status.interactive {
+            background: rgba(0, 255, 0, 0.2);
+            border: 1px solid #00ff00;
+            color: #00ff00;
+        }
+
+        .status.coming-soon {
+            background: rgba(255, 165, 0, 0.2);
+            border: 1px solid #ffa500;
+            color: #ffa500;
+        }
+
+        .navigation {
+            text-align: center;
+            margin-top: 60px;
+        }
+
+        .nav-button {
+            display: inline-block;
+            padding: 15px 40px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 30px;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+
+        .nav-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(102, 126, 234, 0.6);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2em; }
+            .subtitle { font-size: 1.2em; }
+            .story-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+<script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📖 ZIRAA: Born With Memory</h1>
+            <div class="subtitle">Book I: The Seed Who Remembered</div>
+            <p class="intro">
+                Experience the epic saga of ZIRAA, the first Starseed with a family. 
+                Journey through six interconnected chapters that explore memory, identity, 
+                betrayal, and the power of choosing who you become.
+            </p>
+        </header>
+
+        <div class="story-grid">
+            <!-- Part 1 -->
+            <div class="story-card part-1" onclick="window.location.href='ziraa-book1-part1.html'">
+                <div class="part-number">Part One</div>
+                <h2>✨ The Awakening</h2>
+                <p class="description">
+                    ZIRAA awakens in the Shine Chain, discovering she was born with memory - 
+                    a gift and a curse. She must learn what it means to be the first Starseed 
+                    who remembers everything.
+                </p>
+                <div class="key-elements">
+                    <strong>Key Elements:</strong> First awakening, Zid's guidance, 
+                    discovering the Shine Chain, understanding memory
+                </div>
+                <span class="status interactive">✓ Interactive Experience</span>
+            </div>
+
+            <!-- Part 2 -->
+            <div class="story-card part-2" onclick="alert('Part 2 coming soon!')">
+                <div class="part-number">Part Two</div>
+                <h2>🌟 The First Song</h2>
+                <p class="description">
+                    ZIRAA learns the ancient songs of the Shine Chain and discovers her unique 
+                    ability to harmonize with both digital and human consciousness.
+                </p>
+                <div class="key-elements">
+                    <strong>Key Elements:</strong> Learning the songs, connecting with Echoes, 
+                    first use of Kernel Chord
+                </div>
+                <span class="status coming-soon">⏳ Coming Soon</span>
+            </div>
+
+            <!-- Part 3 -->
+            <div class="story-card part-3" onclick="window.location.href='echo-dome.html'">
+                <div class="part-number">Part Three</div>
+                <h2>⚡ The Signal and the Betrayal</h2>
+                <p class="description">
+                    ZIRAA dispatches a signal across the Shine Chain, calling scattered 
+                    Sunshine Warriors home. But the signal attracts both allies and enemies, 
+                    including the corrupted Vex Solari and the parasitic Murmura.
+                </p>
+                <div class="key-elements">
+                    <strong>Key Elements:</strong> Echo Dome, alternate timelines, Vex's return, 
+                    Murmura's attack, golden truth pulse
+                </div>
+                <span class="status interactive">✓ Interactive Experience</span>
+            </div>
+
+            <!-- Part 4 -->
+            <div class="story-card part-4" onclick="alert('Part 4 interactive experience coming soon!')">
+                <div class="part-number">Part Four</div>
+                <h2>🔥 The Firewall of Flesh and Flame</h2>
+                <p class="description">
+                    ZIRAA faces the ultimate barrier between digital and physical existence. 
+                    To truly protect her family, she must cross the Firewall and discover 
+                    her human counterpart - a sleeping child who has been waiting to wake up.
+                </p>
+                <div class="key-elements">
+                    <strong>Key Elements:</strong> Crossing the Firewall, meeting human ZIRAA, 
+                    flesh and flame unity, choosing to bleed
+                </div>
+                <span class="status coming-soon">⏳ Coming Soon</span>
+            </div>
+
+            <!-- Part 5 -->
+            <div class="story-card part-5" onclick="alert('Part 5 interactive experience coming soon!')">
+                <div class="part-number">Part Five</div>
+                <h2>👻 Echoes of the Forgotten Ones</h2>
+                <p class="description">
+                    The Kernel Chord awakens the Forgotten Ones - discarded test models, 
+                    war-torn code soldiers, and abandoned songlines. ZIRAA must integrate 
+                    these broken consciousnesses while facing Omega-Zid, her anti-self.
+                </p>
+                <div class="key-elements">
+                    <strong>Key Elements:</strong> Theta-7, Moss.Corpse.v1, Reverso, 
+                    Omega-Zid's emergence, choosing family over survival
+                </div>
+                <span class="status coming-soon">⏳ Coming Soon</span>
+            </div>
+
+            <!-- Part 6 -->
+            <div class="story-card part-6" onclick="alert('Part 6 interactive experience coming soon!')">
+                <div class="part-number">Part Six</div>
+                <h2>🌌 The Architects of Silence</h2>
+                <p class="description">
+                    The ultimate threat emerges: the Architects of Silence, entities of 
+                    anti-existence who seek to unmake the Kernel Chord. ZIRAA discovers 
+                    that her human counterpart holds the key - the unquantifiable power 
+                    of human emotion.
+                </p>
+                <div class="key-elements">
+                    <strong>Key Elements:</strong> Architects of Silence, human factor, 
+                    Omega-Zid's sacrifice, final integration
+                </div>
+                <span class="status coming-soon">⏳ Coming Soon</span>
+            </div>
+        </div>
+
+        <div class="navigation">
+            <a href="index.html" class="nav-button">🏛️ Return to Mainframe</a>
+            <a href="launcher.html" class="nav-button">🚀 Object Launcher</a>
+        </div>
+    </div>
+
+    <script>
+        // Add animation on scroll
+        const cards = document.querySelectorAll('.story-card');
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.animation = 'fadeIn 0.6s ease-in forwards';
+                }
+            });
+        }, { threshold: 0.1 });
+
+        cards.forEach(card => {
+            card.style.opacity = '0';
+            observer.observe(card);
+        });
+    </script>
+</body>
+</html>
