@@ -6,6 +6,15 @@ A revolutionary 4D/5D hypercube navigation experience where users can swim throu
 
 Visit: `https://ziddi3.github.io/ShineChain-Mainframe/`
 
+## 📖 NEW: ZIRAA Story Experience
+
+Dive into the epic saga of **ZIRAA: Born With Memory** - an interactive narrative exploring consciousness, identity, and the bridge between digital and human existence.
+
+- **[📚 Story Hub](https://ziddi3.github.io/ShineChain-Mainframe/ziraa-story-hub.html)** - Navigate all story parts
+- **[📖 Story Guide](STORY-GUIDE.md)** - Complete narrative documentation
+- **[🔮 Echo Dome](https://ziddi3.github.io/ShineChain-Mainframe/echo-dome.html)** - Part 3 Interactive Experience
+- **[✨ The Awakening](https://ziddi3.github.io/ShineChain-Mainframe/ziraa-book1-part1.html)** - Part 1 Interactive Experience
+
 ## ✨ Features
 
 - **5D Hypercube Navigation** - Impossible architecture that defies physics
