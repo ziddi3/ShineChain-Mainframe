@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShineChain - Object Launcher</title>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: radial-gradient(circle, #000428, #004e92, #000428);
+            font-family: 'Arial', sans-serif;
+            touch-action: none;
+            user-select: none;
+        }
+        
+        #realm-container {
+            width: 100vw;
+            height: 100vh;
+            perspective: 1200px;
+            position: relative;
+        }
+        
+        .space {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            transform-style: preserve-3d;
+            transition: transform 0.1s ease-out;
+        }
+        
+        .exhibit {
+            position: absolute;
+            background: rgba(102, 126, 234, 0.3);
+            border: 2px solid #667eea;
+            border-radius: 15px;
+            padding: 20px;
+            color: white;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+            user-select: none;
+            min-width: 200px;
+            max-width: 300px;
+            cursor: grab;
+            transition: all 0.2s ease;
+            transform-origin: center center;
+        }
+        
+        .exhibit:active {
+            cursor: grabbing;
+            transform: scale(1.1);
+            z-index: 1000;
+            box-shadow: 0 20px 50px rgba(102, 126, 234, 0.8);
+        }
+        
+        .exhibit.charging {
+            cursor: grabbing;
+            background: rgba(255, 215, 0, 0.5);
+            border-color: #FFD700;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
+            animation: charge-pulse 0.5s infinite;
+        }
+        
+        @keyframes charge-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .exhibit.launching {
+            pointer-events: none;
+            z-index: 1000;
+        }
+        
+        .exhibit.launched {
+            pointer-events: none;
+            transition: none;
+        }
+        
+        .sunshine-exhibit {
+            background: rgba(255, 215, 0, 0.3);
+            border-color: #FFD700;
+            color: #8B4513;
+        }
+        
+        .sunshine-exhibit.charging {
+            background: rgba(102, 126, 234, 0.5);
+            border-color: #667eea;
+            color: white;
+        }
+        
+        .trajectory-line {
+            position: absolute;
+            height: 3px;
+            background: linear-gradient(90deg, rgba(255, 215, 0, 0.8), transparent);
+            border-radius: 2px;
+            pointer-events: none;
+            opacity: 0;
+            transform-origin: left center;
+            z-index: 999;
+        }
+        
+        .trajectory-line.active {
+            opacity: 1;
+            animation: trajectory-pulse 0.3s infinite;
+        }
+        
+        @keyframes trajectory-pulse {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 0.4; }
+        }
+        
+        .velocity-indicator {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            border: 3px solid rgba(255, 215, 0, 0.8);
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0;
+            transition: all 0.1s;
+        }
+        
+        .velocity-indicator.active { opacity: 1; }
+        .velocity-indicator.low { border-color: #00ff00; }
+        .velocity-indicator.medium { border-color: #ffff00; }
+        .velocity-indicator.high { border-color: #ff6600; }
+        .velocity-indicator.extreme { border-color: #ff0000; animation: extreme-shake 0.1s infinite; }
+        
+        @keyframes extreme-shake {
+            0%, 100% { transform: translate(-50%, -50%) rotate(0deg); }
+            25% { transform: translate(-50%, -50%) rotate(2deg); }
+            75% { transform: translate(-50%, -50%) rotate(-2deg); }
+        }
+        
+        .hook-indicator {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 0, 255, 0.9);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 1001;
+        }
+        
+        .hook-indicator.active {
+            opacity: 1;
+            animation: hook-glow 0.5s infinite;
+        }
+        
+        @keyframes hook-glow {
+            0%, 100% { box-shadow: 0 0 10px rgba(255, 0, 255, 0.5); }
+            50% { box-shadow: 0 0 25px rgba(255, 0, 255, 0.8); }
+        }
+        
+        .launch-burst {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.8), transparent);
+            pointer-events: none;
+            opacity: 0;
+            transform: scale(0);
+            z-index: 998;
+        }
+        
+        .launch-burst.active {
+            animation: burst-effect 0.5s ease-out;
+        }
+        
+        @keyframes burst-effect {
+            0% { opacity: 1; transform: scale(0); }
+            100% { opacity: 0; transform: scale(3); }
+        }
+        
+        .position-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #00ffff;
+            padding: 10px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            border: 1px solid #00ffff;
+        }
+        
+        .layer-indicator {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 215, 0, 0.9);
+            color: #8B4513;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            border: 2px solid #FFD700;
+        }
+        
+        .instructions {
+            position: fixed;
+            top: 80px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 14px;
+            max-width: 280px;
+            border: 1px solid #667eea;
+        }
+        
+        .mobile-controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            z-index: 1000;
+        }
+        
+        .mobile-btn {
+            width: 60px;
+            height: 60px;
+            background: rgba(102, 126, 234, 0.8);
+            border: 2px solid #667eea;
+            border-radius: 50%;
+            color: white;
+            font-size: 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            touch-action: manipulation;
+            user-select: none;
+        }
+        
+        .mobile-btn:active {
+            background: rgba(102, 126, 234, 1);
+            transform: scale(0.9);
+        }
+        
+        @media (max-width: 768px) {
+            .exhibit {
+                min-width: 150px;
+                max-width: 250px;
+                padding: 15px;
+                font-size: 14px;
+            }
+            
+            .instructions {
+                font-size: 12px;
+                padding: 10px;
+                max-width: 200px;
+            }
+        }
+        
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: drift 10s infinite linear;
+        }
+        
+        @keyframes drift {
+            from { transform: translate3d(0, 0, 0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            to { transform: translate3d(100vw, -100vh, 1000px); opacity: 0; }
+        }
+    </style>
+<script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
+</head>
+<body>
+    <div class="instructions">
+        🚀 <strong>Object Launcher:</strong><br>
+        • <strong>Double tap + hold</strong> to charge<br>
+        • <strong>Swipe fast</strong> = more velocity<br>
+        • <strong>J-hook swipe</strong> = behind shot<br>
+        • <strong>Straight swipe</strong> = direct launch<br>
+        • Watch the velocity indicator!
+    </div>
+    
+    <div class="hook-indicator" id="hook-indicator">
+        🪝 HOOK SHOT DETECTED!
+    </div>
+    
+    <div class="layer-indicator" id="layer-indicator">
+        🌟 Zid's Sunshine Realm - Layer 1
+    </div>
+    
+    <div class="position-indicator" id="position-indicator">
+        📍 (0, 0, 0)<br>
+        📏 Layer: 1
+    </div>
+    
+    <div class="velocity-indicator" id="velocity-indicator"></div>
+    <div class="trajectory-line" id="trajectory-line"></div>
+    
+    <div id="realm-container">
+        <div class="space" id="space">
+            
+            <!-- Layer 1: Zid's Realm -->
+            <div class="sunshine-exhibit exhibit launchable" style="transform: translate3d(200px, 100px, 0px);" data-layer="1">
+                <h3>🌞 Welcome to Zid's Realm</h3>
+                <p>Where the Sunshine Kids once played</p>
+                <small>Double tap + hold to launch me!</small>
+            </div>
+            
+            <div class="sunshine-exhibit exhibit launchable" style="transform: translate3d(-300px, 200px, 200px);" data-layer="1">
+                <h3>🎨 The Old Art Studio</h3>
+                <p>Dusty canvases and forgotten dreams</p>
+                <p>🔍 <em>Try a hook shot!</em></p>
+            </div>
+            
+            <div class="sunshine-exhibit exhibit launchable" style="transform: translate3d(400px, -150px, 300px);" data-layer="1">
+                <h3>🏛️ Cobblestone Square</h3>
+                <p>The heart of the original community</p>
+                <p>Launch me with extreme velocity!</p>
+            </div>
+            
+            <div class="sunshine-exhibit exhibit launchable" style="transform: translate3d(-200px, -200px, 500px);" data-layer="1">
+                <h3>🌻 Memory Garden</h3>
+                <p>Where ideas first took root</p>
+                <p>Swipe fast for maximum power!</p>
+            </div>
+            
+            <!-- Layer 2: Transition Zone -->
+            <div class="exhibit launchable" style="transform: translate3d(100px, 300px, 800px);" data-layer="2">
+                <h3>🌀 The Transformation</h3>
+                <p>Between past and future</p>
+                <p>Perfect for hook shots!</p>
+            </div>
+            
+            <div class="exhibit launchable" style="transform: translate3d(-400px, 100px, 1000px);" data-layer="2">
+                <h3>🔮 Vision Portal</h3>
+                <p>Glimpses of what's to come</p>
+                <p>Launch me into the void!</p>
+            </div>
+            
+            <!-- Layer 3: ShineChain Core -->
+            <div class="exhibit launchable" style="transform: translate3d(300px, -100px, 1200px);" data-layer="3">
+                <h3>⚡ ShineChain Genesis</h3>
+                <p>The first block was mined here</p>
+                <p>High velocity recommended!</p>
+            </div>
+            
+            <div class="exhibit launchable" style="transform: translate3d(-100px, 250px, 1500px);" data-layer="3">
+                <h3>🚀 Technology Core</h3>
+                <p>10,000+ TPS blockchain engine</p>
+                <p>Try extreme launch speeds!</p>
+            </div>
+            
+            <div class="launch-burst" id="launch-burst"></div>
+            <div id="particles"></div>
+        </div>
+    </div>
+    
+    <div class="mobile-controls">
+        <div class="mobile-btn" id="reset-btn">🏠</div>
+        <div class="mobile-btn" id="layer-up">⬆️</div>
+        <div class="mobile-btn" id="layer-down">⬇️</div>
+    </div>
+
+    <script>
+        // Firebase setup
+        const firebaseConfig = {
+            apiKey: "AIzaSyDGpAHia_wEmrhnmYjrPf1n1TrAzwEtKWE",
+            authDomain: "usechatgpt-19e18.firebaseapp.com",
+            projectId: "usechatgpt-19e18",
+            storageBucket: "usechatgpt-19e18.firebasestorage.app",
+            messagingSenderId: "581632635532",
+            appId: "1:581632635532:web:6177f4b8cb86d5b3dc1d8f"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        
+        let position = { x: 0, y: 0, z: 0 };
+        let rotation = { x: 0, y: 0, z: 0 };
+        let currentLayer = 1;
+        let isCharging = false;
+        let chargingExhibit = null;
+        let chargeStartTime = 0;
+        let touchStartPos = null;
+        let swipePath = [];
+        let lastTouchTime = 0;
+        let tapCount = 0;
+        
+        const space = document.getElementById('space');
+        const positionIndicator = document.getElementById('position-indicator');
+        const layerIndicator = document.getElementById('layer-indicator');
+        const velocityIndicator = document.getElementById('velocity-indicator');
+        const trajectoryLine = document.getElementById('trajectory-line');
+        const hookIndicator = document.getElementById('hook-indicator');
+        const launchBurst = document.getElementById('launch-burst');
+        
+        function triggerHaptic(intensity = 'medium') {
+            if (navigator.vibrate) {
+                const patterns = { light: [10], medium: [20], strong: [50], extreme: [100, 50, 100] };
+                navigator.vibrate(patterns[intensity] || patterns.medium);
+            }
+        }
+        
+        function updateDisplay() {
+            space.style.transform = `
+                translate3d(${position.x}px, ${position.y}px, ${position.z}px)
+                rotateX(${rotation.x}deg)
+                rotateY(${rotation.y}deg)
+                rotateZ(${rotation.z}deg)
+            `;
+            
+            positionIndicator.innerHTML = `📍 (${Math.round(position.x)}, ${Math.round(position.y)}, ${Math.round(position.z)})<br>📏 Layer: ${currentLayer}`;
+            
+            const layerNames = {
+                1: "🌟 Zid's Sunshine Realm",
+                2: "🌀 Transformation Zone", 
+                3: "⚡ ShineChain Core",
+                4: "∞ Infinite Possibilities"
+            };
+            
+            layerIndicator.textContent = `${layerNames[currentLayer] || '🌌 Deep Space'} - Layer ${currentLayer}`;
+        }
+        
+        function calculateVelocity(path, timeSpan) {
+            if (path.length < 2) return 0;
+            let totalDistance = 0;
+            for (let i = 1; i < path.length; i++) {
+                const dx = path[i].x - path[i-1].x;
+                const dy = path[i].y - path[i-1].y;
+                totalDistance += Math.sqrt(dx * dx + dy * dy);
+            }
+            return totalDistance / timeSpan;
+        }
+        
+        function detectHookShot(path) {
+            if (path.length < 5) return false;
+            const start = path[0];
+            const middle = path[Math.floor(path.length / 2)];
+            const end = path[path.length - 1];
+            const angle1 = Math.atan2(middle.y - start.y, middle.x - start.x);
+            const angle2 = Math.atan2(end.y - middle.y, end.x - middle.x);
+            const angleDiff = Math.abs(angle1 - angle2);
+            return angleDiff > Math.PI / 3;
+        }
+        
+        function launchObject(exhibit, velocity, direction, isHookShot = false) {
+            exhibit.classList.add('launched');
+            
+            const rect = exhibit.getBoundingClientRect();
+            launchBurst.style.left = rect.left + rect.width / 2 - 50 + 'px';
+            launchBurst.style.top = rect.top + rect.height / 2 - 50 + 'px';
+            launchBurst.classList.add('active');
+            setTimeout(() => launchBurst.classList.remove('active'), 500);
+            
+            const speed = Math.min(velocity * 0.1, 50);
+            const duration = Math.max(1000, velocity * 10);
+            
+            let targetX, targetY, targetZ;
+            if (isHookShot) {
+                targetX = -direction.x * speed * 20;
+                targetY = -direction.y * speed * 20;
+                targetZ = 1000;
+            } else {
+                targetX = direction.x * speed * 10;
+                targetY = direction.y * speed * 10;
+                targetZ = -speed * 30;
+            }
+            
+            exhibit.style.transition = `transform ${duration}ms cubic-bezier(0.25, 0.46, 0.45, 0.94)`;
+            exhibit.style.transform += ` translate3d(${targetX}px, ${targetY}px, ${targetZ}px) rotate3d(1, 1, 1, ${speed * 10}deg)`;
+            exhibit.style.opacity = '0.3';
+            
+            setTimeout(() => {
+                exhibit.style.transition = 'all 0.2s ease';
+                exhibit.style.transform = exhibit.dataset.originalTransform;
+                exhibit.style.opacity = '1';
+                exhibit.classList.remove('launched');
+            }, duration);
+        }
+        
+        document.addEventListener('touchstart', (e) => {
+            const now = Date.now();
+            const target = e.target.closest('.exhibit');
+            
+            if (!target || !target.classList.contains('launchable')) return;
+            
+            if (now - lastTouchTime < 300) {
+                tapCount++;
+                if (tapCount === 2) {
+                    e.preventDefault();
+                    isCharging = true;
+                    chargingExhibit = target;
+                    chargeStartTime = now;
+                    touchStartPos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+                    swipePath = [touchStartPos];
+                    target.classList.add('charging');
+                    target.dataset.originalTransform = target.style.transform;
+                    velocityIndicator.classList.add('active');
+                    triggerHaptic('medium');
+                    tapCount = 0;
+                    return;
+                }
+            } else {
+                tapCount = 1;
+            }
+            lastTouchTime = now;
+        });
+        
+        document.addEventListener('touchmove', (e) => {
+            if (!isCharging || !chargingExhibit) return;
+            e.preventDefault();
+            
+            const currentPos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            swipePath.push(currentPos);
+            
+            const dx = currentPos.x - touchStartPos.x;
+            const dy = currentPos.y - touchStartPos.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+            
+            trajectoryLine.style.left = touchStartPos.x + 'px';
+            trajectoryLine.style.top = touchStartPos.y + 'px';
+            trajectoryLine.style.width = distance + 'px';
+            trajectoryLine.style.transform = `rotate(${angle}deg)`;
+            trajectoryLine.classList.add('active');
+            
+            const timeSpan = Date.now() - chargeStartTime;
+            const velocity = calculateVelocity(swipePath, timeSpan);
+            
+            velocityIndicator.classList.remove('low', 'medium', 'high', 'extreme');
+            if (velocity < 0.5) velocityIndicator.classList.add('low');
+            else if (velocity < 1.5) velocityIndicator.classList.add('medium');
+            else if (velocity < 3) { velocityIndicator.classList.add('high'); triggerHaptic('light'); }
+            else { velocityIndicator.classList.add('extreme'); triggerHaptic('strong'); }
+            
+            if (detectHookShot(swipePath)) hookIndicator.classList.add('active');
+            else hookIndicator.classList.remove('active');
+        });
+        
+        document.addEventListener('touchend', (e) => {
+            if (!isCharging || !chargingExhibit) return;
+            e.preventDefault();
+            
+            const timeSpan = Date.now() - chargeStartTime;
+            const velocity = calculateVelocity(swipePath, timeSpan);
+            const isHookShot = detectHookShot(swipePath);
+            
+            if (swipePath.length > 1) {
+                const start = swipePath[0];
+                const end = swipePath[swipePath.length - 1];
+                const direction = { x: end.x - start.x, y: end.y - start.y };
+                const magnitude = Math.sqrt(direction.x * direction.x + direction.y * direction.y);
+                if (magnitude > 0) {
+                    direction.x /= magnitude;
+                    direction.y /= magnitude;
+                }
+                launchObject(chargingExhibit, velocity, direction, isHookShot);
+                if (isHookShot) triggerHaptic('extreme');
+                else if (velocity > 2) triggerHaptic('strong');
+                else triggerHaptic('medium');
+            }
+            
+            chargingExhibit.classList.remove('charging');
+            velocityIndicator.classList.remove('active', 'low', 'medium', 'high', 'extreme');
+            trajectoryLine.classList.remove('active');
+            hookIndicator.classList.remove('active');
+            isCharging = false;
+            chargingExhibit = null;
+            swipePath = [];
+        });
+        
+        document.getElementById('reset-btn').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            position = { x: 0, y: 0, z: 0 };
+            rotation = { x: 0, y: 0, z: 0 };
+            currentLayer = 1;
+            updateDisplay();
+            triggerHaptic('strong');
+        });
+        
+        document.getElementById('layer-up').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            position.z -= 400;
+            currentLayer = Math.max(1, Math.floor(Math.abs(position.z) / 400) + 1);
+            updateDisplay();
+            triggerHaptic('medium');
+        });
+        
+        document.getElementById('layer-down').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            position.z += 400;
+            currentLayer = Math.max(1, Math.floor(Math.abs(position.z) / 400) + 1);
+            updateDisplay();
+            triggerHaptic('medium');
+        });
+        
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.transform = `translateZ(${Math.random() * 2000}px)`;
+                particle.style.animationDelay = Math.random() * 10 + 's';
+                container.appendChild(particle);
+            }
+        }
+        
+        updateDisplay();
+        createParticles();
+    </script>
+</body>
+</html>
