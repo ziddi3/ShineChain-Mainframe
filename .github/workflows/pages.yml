@@ -22,29 +22,19 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      # SELF-HEAL GUARDRAILS (pure-static fallback)
-      - name: Ensure site entry exists
+      - name: Prepare site files
         run: |
           mkdir -p _site
-          # Prefer ./dist or ./build if your tool outputs there; otherwise copy root.
-          if [ -d "dist" ]; then SRC="dist"; elif [ -d "build" ]; then SRC="build"; else SRC="."; fi
-          # Require an index.html; if missing, generate a minimal one so Pages never 404s.
-          if [ ! -f "$SRC/index.html" ]; then
-            echo '[WARN] No index.html found in '"$SRC"', generating minimal placeholder.'
-            cat > _site/index.html <<'HTML'
-            <!doctype html><html><head>
-              <meta charset="utf-8"/>
-              <meta name="viewport" content="width=device-width,initial-scale=1"/>
-              <title>ShineChain – Coming Online</title>
-              <style>html,body{margin:0;padding:0;background:#0b0b14;color:#cfe1ff;font-family:system-ui,Roboto,Segoe UI,Helvetica,Arial}</style>
-            </head><body>
-              <h1 style="padding:2rem">ShineChain is deploying…</h1>
-              <p style="padding:0 2rem 2rem">This is an automatic fallback page. Once the main build outputs an index.html, it will appear here.</p>
-            </body></html>
-            HTML
-          else
-            rsync -a "$SRC"/ _site/
+          # Copy all HTML files and assets, excluding git directories
+          cp *.html _site/ 2>/dev/null || true
+          cp *.md _site/ 2>/dev/null || true
+          # Verify index.html exists
+          if [ ! -f "_site/index.html" ]; then
+            echo "ERROR: index.html not found after copy!"
+            exit 1
           fi
+          echo "Site prepared successfully"
+          ls -la _site/
 
       - name: Upload artifact for Pages
         uses: actions/upload-pages-artifact@v3
