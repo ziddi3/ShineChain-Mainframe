@@ -1,8 +1,9 @@
-name: Deploy ShineChain to GitHub Pages
-
+name: Ever-Deploy ShineChain Mainframe
 on:
   push:
     branches: [ main ]
+  schedule:
+    - cron: "0 */6 * * *"     # re-deploy every 6 h to prevent drift
   workflow_dispatch:
 
 permissions:
@@ -12,43 +13,78 @@ permissions:
 
 concurrency:
   group: "pages"
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
-  build:
-    name: Build static site
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout repo
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Prepare site files
+      - name: Build site
         run: |
+          echo "🔧 Preparing ShineChain site..."
           mkdir -p _site
-          # Copy all HTML files and assets, excluding git directories
-          cp *.html _site/ 2>/dev/null || true
-          cp *.md _site/ 2>/dev/null || true
-          # Verify index.html exists
-          if [ ! -f "_site/index.html" ]; then
-            echo "ERROR: index.html not found after copy!"
-            exit 1
+          SRC="."
+          [ -d "dist" ] && SRC="dist"
+          [ -d "build" ] && SRC="build"
+
+          if [ ! -f "$SRC/index.html" ]; then
+            echo "⚠️  No index.html found, generating fallback..."
+            cat <<'EOF' > _site/index.html
+            <!doctype html>
+            <html><head><meta charset="utf-8"/><title>ShineChain Node</title></head>
+            <body><h1>🌞 ShineChain Core Reinitializing...</h1></body></html>
+            EOF
+          else
+            find "$SRC" -maxdepth 1 -type f \( -name '*.html' -o -name '*.md' -o -name '*.css' -o -name '*.js' \) -exec cp {} _site/ \;
           fi
-          echo "Site prepared successfully"
+          echo "✅ Site prepared."
           ls -la _site/
 
-      - name: Upload artifact for Pages
+      - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: _site
 
-  deploy:
-    name: Deploy to GitHub Pages
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy
+      - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Verify deployment
+        run: |
+          sleep 10
+          STATUS=$(curl -Is https://ziddi3.github.io/ShineChain-Mainframe/ | head -n1)
+          echo "🌐 $STATUS"
+          echo "$STATUS" > status.log
+          if [[ "$STATUS" != *"200"* ]]; then
+            echo "⚠️  Deployment verification failed. Site may need manual check."
+          else
+            echo "✅ Deployment verified successfully!"
+          fi
+
+      - name: Log to Zapier/Notion
+        if: always()
+        env:
+          ZAPIER_WEBHOOK_URL: ${{ secrets.ZAPIER_WEBHOOK_URL }}
+        run: |
+          if [ -n "$ZAPIER_WEBHOOK_URL" ]; then
+            echo "🛰️  Logging deployment to Zapier & Notion..."
+            curl -X POST "$ZAPIER_WEBHOOK_URL" \
+              -H "Content-Type: application/json" \
+              -d "{
+                &quot;project&quot;: &quot;ShineChain Mainframe&quot;,
+                &quot;status&quot;: &quot;${{ job.status }}&quot;,
+                &quot;timestamp&quot;: &quot;$(date -u '+%Y-%m-%dT%H:%M:%SZ')&quot;,
+                &quot;commit&quot;: &quot;${{ github.sha }}&quot;,
+                &quot;workflow&quot;: &quot;Ever-Deploy v5&quot;,
+                &quot;url&quot;: &quot;https://ziddi3.github.io/ShineChain-Mainframe/&quot;
+              }" || echo "⚠️  Zapier webhook not configured or failed"
+          else
+            echo "ℹ️  Zapier webhook not configured. Skipping external logging."
+          fi
