@@ -1,0 +1,64 @@
+name: Deploy ShineChain to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build static site
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      # SELF-HEAL GUARDRAILS (pure-static fallback)
+      - name: Ensure site entry exists
+        run: |
+          mkdir -p _site
+          # Prefer ./dist or ./build if your tool outputs there; otherwise copy root.
+          if [ -d "dist" ]; then SRC="dist"; elif [ -d "build" ]; then SRC="build"; else SRC="."; fi
+          # Require an index.html; if missing, generate a minimal one so Pages never 404s.
+          if [ ! -f "$SRC/index.html" ]; then
+            echo '[WARN] No index.html found in '"$SRC"', generating minimal placeholder.'
+            cat > _site/index.html <<'HTML'
+            <!doctype html><html><head>
+              <meta charset="utf-8"/>
+              <meta name="viewport" content="width=device-width,initial-scale=1"/>
+              <title>ShineChain – Coming Online</title>
+              <style>html,body{margin:0;padding:0;background:#0b0b14;color:#cfe1ff;font-family:system-ui,Roboto,Segoe UI,Helvetica,Arial}</style>
+            </head><body>
+              <h1 style="padding:2rem">ShineChain is deploying…</h1>
+              <p style="padding:0 2rem 2rem">This is an automatic fallback page. Once the main build outputs an index.html, it will appear here.</p>
+            </body></html>
+            HTML
+          else
+            rsync -a "$SRC"/ _site/
+          fi
+
+      - name: Upload artifact for Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
