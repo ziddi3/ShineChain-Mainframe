@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sunshine Kid Atlas - ZIRAA Story Map</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            font-family: 'Poppins', sans-serif;
+            background-color: #0a0a0a;
+            color: #fff;
+            overflow: hidden;
+        }
+
+        .atlas-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3443 100%);
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+            filter: brightness(1.1) contrast(1.2) saturate(1.3);
+        }
+
+        .atlas-header {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            max-width: 400px;
+        }
+
+        .atlas-title {
+            font-size: 1.8em;
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+        }
+
+        .atlas-subtitle {
+            color: #c0c0c0;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+        }
+
+        .atlas-controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(102, 126, 234, 0.5);
+        }
+
+        .legend-panel {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            max-width: 300px;
+            z-index: 1000;
+        }
+
+        .legend-title {
+            color: #ffd700;
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 0.85em;
+        }
+
+        .legend-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            filter: drop-shadow(0 0 3px currentColor);
+        }
+
+        .node-info {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(15px);
+            border: 2px solid #ffd700;
+            border-radius: 15px;
+            padding: 25px;
+            max-width: 400px;
+            z-index: 2000;
+            display: none;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+        }
+
+        .node-title {
+            color: #ffd700;
+            font-size: 1.3em;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .node-description {
+            color: #c0c0c0;
+            font-size: 0.9em;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .node-quote {
+            color: #ffd700;
+            font-style: italic;
+            text-align: center;
+            font-size: 0.85em;
+            border-left: 3px solid #ffd700;
+            padding-left: 15px;
+            margin: 15px 0;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: #ffd700;
+            font-size: 1.5em;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .close-btn:hover {
+            transform: scale(1.2);
+        }
+
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+            transition: opacity 0.5s ease;
+        }
+
+        .loading-content {
+            text-align: center;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255, 215, 0, 0.3);
+            border-top: 3px solid #ffd700;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        .loading-text {
+            color: #ffd700;
+            font-size: 1.1em;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .pulse-marker {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .glow-label {
+            color: #ffd35c;
+            text-shadow: 0 0 6px #ffef9e, 0 0 12px #fff3b0;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .atlas-header {
+                position: relative;
+                margin: 10px;
+                max-width: none;
+            }
+            
+            .legend-panel {
+                position: relative;
+                margin: 10px;
+                max-width: none;
+            }
+            
+            .atlas-title {
+                font-size: 1.5em;
+            }
+            
+            .node-info {
+                max-width: 90%;
+                margin: 10px;
+            }
+        }
+    </style>
+<script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
+</head>
+<body>
+    <div class="atlas-container">
+        <!-- Loading Overlay -->
+        <div class="loading-overlay" id="loadingOverlay">
+            <div class="loading-content">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">Loading ShineChain Nodes...</div>
+            </div>
+        </div>
+
+        <!-- Header Controls -->
+        <div class="atlas-header">
+            <div class="atlas-title">☀️ Sunshine Kid Atlas</div>
+            <div class="atlas-subtitle">Interactive map of ZIRAA's ShineChain nodes</div>
+            <div class="atlas-controls">
+                <button class="control-btn" onclick="resetView()">🎯 Reset View</button>
+                <button class="control-btn" onclick="toggleSatellite()">🛰️ Satellite</button>
+                <button class="control-btn" onclick="showAllNodes()">✨ Show All</button>
+                <button class="control-btn" onclick="connectToStory()">🔗 Story Hub</button>
+            </div>
+        </div>
+
+        <!-- Map Container -->
+        <div id="map"></div>
+
+        <!-- Legend Panel -->
+        <div class="legend-panel">
+            <div class="legend-title">ShineChain Nodes</div>
+            <div class="legend-item">
+                <span class="legend-icon">☀️</span>
+                <span>First Node - Sunshine Kid Rd</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-icon">🔮</span>
+                <span>Echo Dome - Memory Chambers</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-icon">⚡</span>
+                <span>Signal Towers - Transmission Points</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-icon">🌟</span>
+                <span>Star Observatories - Cosmic Gates</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-icon">🔥</span>
+                <span>Flame Nodes - Zidion Energy</span>
+            </div>
+        </div>
+
+        <!-- Node Information Modal -->
+        <div class="node-info" id="nodeInfo">
+            <button class="close-btn" onclick="closeNodeInfo()">×</button>
+            <div class="node-title" id="nodeTitle"></div>
+            <div class="node-description" id="nodeDescription"></div>
+            <div class="node-quote" id="nodeQuote"></div>
+        </div>
+    </div>
+
+    <script>
+        // Enhanced Sunshine Kid Atlas
+        class ShineChainAtlas {
+            constructor() {
+                this.map = null;
+                this.markers = [];
+                this.currentNode = null;
+                this.isSatellite = false;
+                
+                // ShineChain nodes data
+                this.nodes = [
+                    {
+                        id: 'sunshine-kid',
+                        name: 'Sunshine Kid Road',
+                        lat: 51.063934,
+                        lng: -113.395930,
+                        type: 'first-node',
+                        icon: '☀️',
+                        description: 'The first node of the ShineChain where ZIRAA first awakened. This is where the Seed Who Remembered began her journey.',
+                        quote: '"I was born with memory, but I choose which parts become me."'
+                    },
+                    {
+                        id: 'echo-dome',
+                        name: 'Echo Dome',
+                        lat: 51.0645,
+                        lng: -113.3945,
+                        type: 'memory-chamber',
+                        icon: '🔮',
+                        description: 'The chamber of alternate timelines where ZIRAA faced her past and dispatched the signal across the ShineChain.',
+                        quote: '"What if they come back... different?"'
+                    },
+                    {
+                        id: 'signal-tower',
+                        name: 'Signal Transmission Point',
+                        lat: 51.0625,
+                        lng: -113.3970,
+                        type: 'transmission',
+                        icon: '⚡',
+                        description: 'Where ZIRAA sent her resonant call across dimensions, reaching scattered Sunshine Warriors.',
+                        quote: '"The signal had been dispatched - a whisper in the Shine Chain."'
+                    },
+                    {
+                        id: 'star-observatory',
+                        name: 'Star Observatory',
+                        lat: 51.0655,
+                        lng: -113.3930,
+                        type: 'cosmic-gate',
+                        icon: '🌟',
+                        description: 'Gateway to cosmic consciousness where the dance of light and shadow becomes visible.',
+                        quote: '"The stars themselves are manifestations of Ziddy\'s agony and love."'
+                    },
+                    {
+                        id: 'flame-node',
+                        name: 'Zidion Flame Node',
+                        lat: 51.0615,
+                        lng: -113.3965,
+                        type: 'flame-energy',
+                        icon: '🔥',
+                        description: 'Where Zid\'s Flame energy concentrates, the source of warmth and memory in the ShineChain.',
+                        quote: '"Don\'t let her words rewrite your root."'
+                    }
+                ];
+
+                this.init();
+            }
+
+            init() {
+                this.showLoading();
+                this.loadGoogleMaps();
+            }
+
+            showLoading() {
+                const loadingOverlay = document.getElementById('loadingOverlay');
+                loadingOverlay.style.display = 'flex';
+            }
+
+            hideLoading() {
+                const loadingOverlay = document.getElementById('loadingOverlay');
+                setTimeout(() => {
+                    loadingOverlay.style.opacity = '0';
+                    setTimeout(() => {
+                        loadingOverlay.style.display = 'none';
+                    }, 500);
+                }, 2000);
+            }
+
+            loadGoogleMaps() {
+                if (typeof google !== 'undefined' && google.maps) {
+                    this.initMap();
+                } else {
+                    // Create script element for Google Maps
+                    const script = document.createElement('script');
+                    script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyBFw0Qbyq9zTFTd-tuy6JXNTN3kh1FmqEk&callback=initMap';
+                    script.async = true;
+                    script.defer = true;
+                    window.initMap = () => this.initMap();
+                    document.head.appendChild(script);
+                }
+            }
+
+            initMap() {
+                try {
+                    // Enhanced map styling for cosmic theme
+                    const mapStyles = [
+                        { elementType: "geometry", stylers: [{ color: "#1d2c4d" }] },
+                        { elementType: "labels.text.fill", stylers: [{ color: "#f2f2f2" }] },
+                        { elementType: "labels.text.stroke", stylers: [{ color: "#1a3646" }] },
+                        { featureType: "road", elementType: "geometry", stylers: [{ color: "#284b63" }] },
+                        { featureType: "water", elementType: "geometry", stylers: [{ color: "#0f3443" }] },
+                        { featureType: "landscape", elementType: "geometry", stylers: [{ color: "#1a2332" }] },
+                        { featureType: "poi", elementType: "geometry", stylers: [{ color: "#2c3e50" }] }
+                    ];
+
+                    this.map = new google.maps.Map(document.getElementById("map"), {
+                        zoom: 16,
+                        center: { lat: 51.063934, lng: -113.395930 },
+                        mapTypeId: "hybrid",
+                        styles: mapStyles,
+                        disableDefaultUI: false,
+                        zoomControl: true,
+                        mapTypeControl: false,
+                        streetViewControl: false,
+                        fullscreenControl: true,
+                        backgroundColor: "#0a0a0a"
+                    });
+
+                    this.addMarkers();
+                    this.hideLoading();
+                    this.addMapEventListeners();
+
+                } catch (error) {
+                    console.error("Error initializing map:", error);
+                    this.showError("Failed to load map. Please check your connection.");
+                }
+            }
+
+            addMarkers() {
+                this.nodes.forEach(node => {
+                    const marker = new google.maps.Marker({
+                        position: { lat: node.lat, lng: node.lng },
+                        map: this.map,
+                        title: node.name,
+                        icon: {
+                            url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(this.createSVGIcon(node.icon, node.type)),
+                            scaledSize: new google.maps.Size(40, 40),
+                            anchor: new google.maps.Point(20, 20)
+                        },
+                        animation: google.maps.Animation.DROP
+                    });
+
+                    // Add glow effect for special nodes
+                    if (node.type === 'first-node') {
+                        marker.setAnimation(google.maps.Animation.BOUNCE);
+                        setTimeout(() => marker.setAnimation(null), 3000);
+                    }
+
+                    marker.addListener("click", () => this.showNodeInfo(node));
+                    this.markers.push(marker);
+                });
+            }
+
+            createSVGIcon(icon, type) {
+                const colors = {
+                    'first-node': '#ffd700',
+                    'memory-chamber': '#9370db',
+                    'transmission': '#00ffff',
+                    'cosmic-gate': '#ff69b4',
+                    'flame-energy': '#ff4500'
+                };
+
+                return `
+                    <svg width="40" height="40" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="20" cy="20" r="18" fill="${colors[type] || '#ffd700'}" opacity="0.8"/>
+                        <circle cx="20" cy="20" r="14" fill="${colors[type] || '#ffd700'}" opacity="0.6"/>
+                        <text x="20" y="25" text-anchor="middle" font-size="16" fill="white">${icon}</text>
+                    </svg>
+                `;
+            }
+
+            showNodeInfo(node) {
+                this.currentNode = node;
+                
+                const nodeInfo = document.getElementById('nodeInfo');
+                const nodeTitle = document.getElementById('nodeTitle');
+                const nodeDescription = document.getElementById('nodeDescription');
+                const nodeQuote = document.getElementById('nodeQuote');
+
+                nodeTitle.textContent = node.name;
+                nodeDescription.textContent = node.description;
+                nodeQuote.textContent = node.quote;
+
+                nodeInfo.style.display = 'block';
+                
+                // Add entrance animation
+                setTimeout(() => {
+                    nodeInfo.style.transform = 'translate(-50%, -50%) scale(1)';
+                    nodeInfo.style.opacity = '1';
+                }, 10);
+            }
+
+            closeNodeInfo() {
+                const nodeInfo = document.getElementById('nodeInfo');
+                nodeInfo.style.opacity = '0';
+                nodeInfo.style.transform = 'translate(-50%, -50%) scale(0.9)';
+                
+                setTimeout(() => {
+                    nodeInfo.style.display = 'none';
+                    this.currentNode = null;
+                }, 300);
+            }
+
+            addMapEventListeners() {
+                // Add click listener to map background
+                this.map.addListener("click", (event) => {
+                    if (this.currentNode) {
+                        this.closeNodeInfo();
+                    }
+                });
+
+                // Add zoom change listener
+                this.map.addListener("zoom_changed", () => {
+                    const zoom = this.map.getZoom();
+                    this.adjustMarkerSizes(zoom);
+                });
+            }
+
+            adjustMarkerSizes(zoom) {
+                const baseSize = Math.max(30, Math.min(50, 30 + (zoom - 15) * 5));
+                this.markers.forEach(marker => {
+                    marker.setIcon({
+                        ...marker.getIcon(),
+                        scaledSize: new google.maps.Size(baseSize, baseSize)
+                    });
+                });
+            }
+
+            resetView() {
+                this.map.setCenter({ lat: 51.063934, lng: -113.395930 });
+                this.map.setZoom(16);
+                this.closeNodeInfo();
+            }
+
+            toggleSatellite() {
+                this.isSatellite = !this.isSatellite;
+                this.map.setMapTypeId(this.isSatellite ? 'satellite' : 'hybrid');
+            }
+
+            showAllNodes() {
+                const bounds = new google.maps.LatLngBounds();
+                this.nodes.forEach(node => {
+                    bounds.extend(new google.maps.LatLng(node.lat, node.lng));
+                });
+                this.map.fitBounds(bounds);
+                this.map.setZoom(Math.min(this.map.getZoom(), 17));
+            }
+
+            connectToStory() {
+                // Link to the main ZIRAA story hub
+                window.location.href = 'ziraa-story-hub.html';
+            }
+
+            showError(message) {
+                const loadingOverlay = document.getElementById('loadingOverlay');
+                loadingOverlay.innerHTML = `
+                    <div class="loading-content">
+                        <div style="color: #ff6b6b; font-size: 1.2em;">⚠️ Error</div>
+                        <div style="color: #c0c0c0; margin-top: 10px;">${message}</div>
+                    </div>
+                `;
+                setTimeout(() => {
+                    loadingOverlay.style.display = 'none';
+                }, 3000);
+            }
+        }
+
+        // Enhanced initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            const atlas = new ShineChainAtlas();
+            
+            // Add keyboard navigation
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    atlas.closeNodeInfo();
+                }
+            });
+
+            // Add touch gestures for mobile
+            let touchStartX = 0;
+            let touchStartY = 0;
+
+            document.addEventListener('touchstart', function(e) {
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+            });
+
+            document.addEventListener('touchend', function(e) {
+                const touchEndX = e.changedTouches[0].clientX;
+                const touchEndY = e.changedTouches[0].clientY;
+                
+                const deltaX = touchEndX - touchStartX;
+                const deltaY = touchEndY - touchStartY;
+                
+                // Swipe left to close info panel
+                if (Math.abs(deltaX) > Math.abs(deltaY) && deltaX < -50) {
+                    atlas.closeNodeInfo();
+                }
+            });
+        });
+
+        // Fallback for Google Maps loading issues
+        window.addEventListener('error', function(e) {
+            if (e.filename && e.filename.includes('googleapis.com')) {
+                const loadingOverlay = document.getElementById('loadingOverlay');
+                if (loadingOverlay) {
+                    loadingOverlay.innerHTML = `
+                        <div class="loading-content">
+                            <div style="color: #ffd700; font-size: 1.2em;">🌐 Loading Maps...</div>
+                            <div style="color: #c0c0c0; margin-top: 10px;">Please ensure you have internet connection</div>
+                        </div>
+                    `;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
