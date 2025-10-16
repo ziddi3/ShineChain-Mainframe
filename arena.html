@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Card Battle Arena - ShineChain</title>
+    
+    <meta name="description" content="Card Battle Arena - Strategic multiplayer card battles in the ShineChain universe. Build your deck and compete!">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0a1e 0%, #1a0a2e 50%, #0a0a0a 100%);
+            font-family: 'Courier New', monospace;
+            color: #00ffff;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .arena-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        .header {
+            text-align: center;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .title {
+            font-size: 2rem;
+            color: #ffd700;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            gap: 1rem;
+            height: calc(100vh - 150px);
+        }
+
+        .opponent-area {
+            background: rgba(255, 0, 0, 0.1);
+            border: 2px solid #ff0000;
+            border-radius: 10px;
+            padding: 1rem;
+        }
+
+        .battlefield {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid #00ffff;
+            border-radius: 10px;
+            padding: 1rem;
+        }
+
+        .player-area {
+            background: rgba(0, 255, 0, 0.1);
+            border: 2px solid #00ff00;
+            border-radius: 10px;
+            padding: 1rem;
+        }
+
+        .player-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .life-display {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .life-display.player {
+            color: #00ff00;
+        }
+
+        .life-display.opponent {
+            color: #ff0000;
+        }
+
+        .resources-display {
+            font-size: 1.2rem;
+            color: #ffd700;
+        }
+
+        .field-zone {
+            display: flex;
+            gap: 0.5rem;
+            min-height: 150px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px dashed #00ffff;
+            border-radius: 5px;
+            padding: 0.5rem;
+            overflow-x: auto;
+        }
+
+        .hand-zone {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            min-height: 120px;
+        }
+
+        .card {
+            width: 100px;
+            height: 140px;
+            background: linear-gradient(135deg, #1a0a2e, #2d1b4e);
+            border: 2px solid #ffd700;
+            border-radius: 8px;
+            padding: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            font-size: 0.7rem;
+        }
+
+        .card:hover {
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: 0 10px 25px rgba(255, 215, 0, 0.4);
+            z-index: 10;
+        }
+
+        .card.unit {
+            border-color: #00ffff;
+        }
+
+        .card.spell {
+            border-color: #ff00ff;
+        }
+
+        .card.equipment {
+            border-color: #ffaa00;
+        }
+
+        .card-cost {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #ffd700;
+            color: #000;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+
+        .card-name {
+            font-size: 0.8rem;
+            color: #ffd700;
+            margin-bottom: 0.3rem;
+            font-weight: bold;
+        }
+
+        .card-image {
+            width: 100%;
+            height: 50px;
+            background: rgba(255, 215, 0, 0.1);
+            border: 1px solid #ffd700;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .card-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 0.3rem;
+        }
+
+        .stat {
+            font-weight: bold;
+        }
+
+        .stat.attack {
+            color: #ff0000;
+        }
+
+        .stat.defense {
+            color: #00ff00;
+        }
+
+        .card-ability {
+            font-size: 0.6rem;
+            color: #00ffff;
+            line-height: 1.2;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .button {
+            padding: 0.8rem 1.5rem;
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            color: #000;
+            border: none;
+            border-radius: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.4);
+        }
+
+        .button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .button.end-turn {
+            background: linear-gradient(45deg, #00ffff, #00cccc);
+        }
+
+        .game-log {
+            position: fixed;
+            right: 10px;
+            top: 100px;
+            width: 250px;
+            max-height: 400px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #00ffff;
+            border-radius: 10px;
+            padding: 1rem;
+            overflow-y: auto;
+            font-size: 0.8rem;
+        }
+
+        .log-entry {
+            margin-bottom: 0.5rem;
+            padding: 0.3rem;
+            border-left: 2px solid #ffd700;
+            padding-left: 0.5rem;
+        }
+
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            padding: 0.8rem 1.5rem;
+            background: rgba(255, 215, 0, 0.2);
+            border: 2px solid #ffd700;
+            border-radius: 25px;
+            color: #ffd700;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 215, 0, 0.3);
+            transform: translateX(-5px);
+        }
+
+        .status-message {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(255, 215, 0, 0.1);
+            border: 2px solid #ffd700;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 1200px) {
+            .game-log {
+                position: static;
+                width: 100%;
+                max-height: 200px;
+                margin-top: 1rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .card {
+                width: 80px;
+                height: 112px;
+                font-size: 0.6rem;
+            }
+
+            .card-image {
+                height: 40px;
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+<script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
+</head>
+<body>
+    <a href="index.html" class="back-button">← Back to Holodeck</a>
+
+    <div class="arena-container">
+        <header class="header">
+            <h1 class="title">⚔️ Card Battle Arena</h1>
+            <p style="opacity: 0.7;">Strategic Combat in the ShineChain Universe</p>
+        </header>
+
+        <div class="status-message" id="status-message">
+            Click "Start Game" to begin your battle!
+        </div>
+
+        <div class="controls">
+            <button class="button" onclick="startGame()">Start Game</button>
+            <button class="button end-turn" id="end-turn-btn" onclick="endTurn()" disabled>End Turn</button>
+            <button class="button" onclick="resetGame()">Reset</button>
+        </div>
+
+        <div class="game-board">
+            <!-- Opponent Area -->
+            <div class="opponent-area">
+                <div class="player-info">
+                    <div class="life-display opponent">
+                        ❤️ Life: <span id="opponent-life">20</span>
+                    </div>
+                    <div class="resources-display">
+                        💎 Resources: <span id="opponent-resources">0</span>/10
+                    </div>
+                    <div>
+                        🃏 Hand: <span id="opponent-hand-count">5</span>
+                    </div>
+                </div>
+                <div class="field-zone" id="opponent-field">
+                    <!-- Opponent's units will appear here -->
+                </div>
+            </div>
+
+            <!-- Battlefield Center -->
+            <div class="battlefield">
+                <div style="text-align: center; padding: 2rem;">
+                    <h3 style="color: #ffd700; margin-bottom: 1rem;">⚔️ Battle Zone</h3>
+                    <p style="opacity: 0.7;">Drag units here to attack</p>
+                    <div id="combat-log" style="margin-top: 1rem; font-size: 0.9rem;">
+                        <!-- Combat messages appear here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Player Area -->
+            <div class="player-area">
+                <div class="field-zone" id="player-field">
+                    <!-- Player's units will appear here -->
+                </div>
+                <div class="player-info">
+                    <div class="life-display player">
+                        ❤️ Life: <span id="player-life">20</span>
+                    </div>
+                    <div class="resources-display">
+                        💎 Resources: <span id="player-resources">0</span>/10
+                    </div>
+                    <div>
+                        🃏 Deck: <span id="deck-count">30</span>
+                    </div>
+                </div>
+                <div class="hand-zone" id="player-hand">
+                    <!-- Player's hand will appear here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="game-log">
+        <h3 style="color: #ffd700; margin-bottom: 1rem;">📜 Game Log</h3>
+        <div id="log-entries">
+            <div class="log-entry">Game initialized. Click Start Game to begin.</div>
+        </div>
+    </div>
+
+    <script>
+        // Game State
+        let gameState = {
+            player: {
+                life: 20,
+                resources: 0,
+                maxResources: 0,
+                hand: [],
+                field: [],
+                deck: [],
+                discard: []
+            },
+            opponent: {
+                life: 20,
+                resources: 0,
+                maxResources: 0,
+                hand: [],
+                field: [],
+                deck: [],
+                discard: []
+            },
+            turn: 'player',
+            turnNumber: 0,
+            gameStarted: false
+        };
+
+        let cardsData = null;
+
+        // Load card data
+        fetch('data/cards.json')
+            .then(response => response.json())
+            .then(data => {
+                cardsData = data;
+                log('Card database loaded: ' + data.cards.length + ' cards available');
+            })
+            .catch(error => {
+                console.error('Error loading cards:', error);
+                log('ERROR: Failed to load card database');
+            });
+
+        function log(message) {
+            const logEntries = document.getElementById('log-entries');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.textContent = message;
+            logEntries.insertBefore(entry, logEntries.firstChild);
+            
+            // Keep only last 20 entries
+            while (logEntries.children.length > 20) {
+                logEntries.removeChild(logEntries.lastChild);
+            }
+        }
+
+        function updateStatus(message) {
+            document.getElementById('status-message').textContent = message;
+        }
+
+        function buildDeck(playerType) {
+            if (!cardsData) return [];
+            
+            const deck = [];
+            const availableCards = cardsData.cards.filter(c => c.type !== 'hero');
+            
+            // Build a 30-card deck with variety
+            while (deck.length < 30) {
+                const randomCard = availableCards[Math.floor(Math.random() * availableCards.length)];
+                const copies = deck.filter(c => c.id === randomCard.id).length;
+                
+                if (copies < 3) {
+                    deck.push({...randomCard});
+                }
+            }
+            
+            // Shuffle deck
+            for (let i = deck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [deck[i], deck[j]] = [deck[j], deck[i]];
+            }
+            
+            return deck;
+        }
+
+        function startGame() {
+            if (!cardsData) {
+                alert('Card data is still loading. Please wait a moment.');
+                return;
+            }
+
+            // Initialize game state
+            gameState.player.deck = buildDeck('player');
+            gameState.opponent.deck = buildDeck('opponent');
+            
+            gameState.player.life = 20;
+            gameState.opponent.life = 20;
+            
+            gameState.player.resources = 0;
+            gameState.opponent.resources = 0;
+            
+            gameState.player.maxResources = 0;
+            gameState.opponent.maxResources = 0;
+            
+            gameState.player.hand = [];
+            gameState.opponent.hand = [];
+            
+            gameState.player.field = [];
+            gameState.opponent.field = [];
+            
+            gameState.turn = 'player';
+            gameState.turnNumber = 1;
+            gameState.gameStarted = true;
+            
+            // Draw starting hands
+            for (let i = 0; i < 5; i++) {
+                drawCard('player');
+                drawCard('opponent');
+            }
+            
+            document.getElementById('end-turn-btn').disabled = false;
+            
+            updateUI();
+            log('=== GAME START ===');
+            log('Both players draw 5 cards');
+            updateStatus("Your turn! Play cards or attack.");
+        }
+
+        function drawCard(player) {
+            const state = gameState[player];
+            
+            if (state.deck.length === 0) {
+                log(`${player} has no cards left to draw!`);
+                if (player === 'player') {
+                    endGame('opponent', 'Player ran out of cards!');
+                } else {
+                    endGame('player', 'Opponent ran out of cards!');
+                }
+                return null;
+            }
+            
+            if (state.hand.length >= 10) {
+                log(`${player}'s hand is full (10 cards max)`);
+                return null;
+            }
+            
+            const card = state.deck.pop();
+            state.hand.push(card);
+            
+            log(`${player} draws: ${card.name}`);
+            return card;
+        }
+
+        function startTurn(player) {
+            const state = gameState[player];
+            
+            // Gain resources
+            state.maxResources = Math.min(state.maxResources + 1, 10);
+            state.resources = state.maxResources;
+            
+            // Draw card
+            drawCard(player);
+            
+            log(`=== ${player.toUpperCase()} TURN ${gameState.turnNumber} ===`);
+            log(`${player} gains 1 max resource (now ${state.maxResources})`);
+            
+            if (player === 'player') {
+                updateStatus(`Turn ${gameState.turnNumber}: You have ${state.resources} resources`);
+            }
+            
+            updateUI();
+        }
+
+        function playCard(cardIndex) {
+            const card = gameState.player.hand[cardIndex];
+            
+            if (!card) return;
+            
+            if (gameState.player.resources < card.cost) {
+                updateStatus(`Not enough resources! Need ${card.cost}, have ${gameState.player.resources}`);
+                return;
+            }
+            
+            // Spend resources
+            gameState.player.resources -= card.cost;
+            
+            // Remove from hand
+            gameState.player.hand.splice(cardIndex, 1);
+            
+            // Play card based on type
+            if (card.type === 'unit') {
+                if (gameState.player.field.length >= 5) {
+                    updateStatus('Field is full! (5 units max)');
+                    gameState.player.hand.push(card);
+                    gameState.player.resources += card.cost;
+                    return;
+                }
+                gameState.player.field.push(card);
+                log(`Player plays ${card.name} (${card.attack}/${card.defense})`);
+            } else if (card.type === 'spell') {
+                executeSpell(card, 'player');
+                gameState.player.discard.push(card);
+            }
+            
+            updateUI();
+            updateStatus(`Played ${card.name}!`);
+        }
+
+        function executeSpell(card, caster) {
+            log(`${caster} casts ${card.name}`);
+            
+            // Simple spell effects
+            if (card.name === 'Shine Burst') {
+                const target = caster === 'player' ? 'opponent' : 'player';
+                gameState[target].life -= 3;
+                log(`${card.name} deals 3 damage to ${target}`);
+            } else if (card.name === 'Memory Echo') {
+                drawCard(caster);
+                drawCard(caster);
+                log(`${caster} draws 2 cards`);
+            }
+        }
+
+        function endTurn() {
+            log('Player ends turn');
+            
+            gameState.turn = 'opponent';
+            gameState.turnNumber++;
+            
+            updateStatus("Opponent's turn...");
+            
+            setTimeout(() => {
+                opponentTurn();
+            }, 1000);
+        }
+
+        function opponentTurn() {
+            startTurn('opponent');
+            
+            // Simple AI: Play random affordable cards
+            setTimeout(() => {
+                let actionsThisTurn = 0;
+                
+                while (actionsThisTurn < 3 && gameState.opponent.hand.length > 0) {
+                    const affordableCards = gameState.opponent.hand
+                        .map((card, index) => ({card, index}))
+                        .filter(({card}) => card.cost <= gameState.opponent.resources);
+                    
+                    if (affordableCards.length === 0) break;
+                    
+                    const {card, index} = affordableCards[Math.floor(Math.random() * affordableCards.length)];
+                    
+                    gameState.opponent.resources -= card.cost;
+                    gameState.opponent.hand.splice(index, 1);
+                    
+                    if (card.type === 'unit' && gameState.opponent.field.length < 5) {
+                        gameState.opponent.field.push(card);
+                        log(`Opponent plays ${card.name}`);
+                    } else if (card.type === 'spell') {
+                        executeSpell(card, 'opponent');
+                        gameState.opponent.discard.push(card);
+                    }
+                    
+                    actionsThisTurn++;
+                    updateUI();
+                }
+                
+                // Opponent attacks with all units
+                setTimeout(() => {
+                    gameState.opponent.field.forEach(unit => {
+                        if (gameState.player.field.length > 0) {
+                            const target = gameState.player.field[0];
+                            log(`Opponent's ${unit.name} attacks ${target.name}`);
+                            
+                            target.defense -= unit.attack;
+                            unit.defense -= target.attack;
+                            
+                            if (target.defense <= 0) {
+                                gameState.player.field.shift();
+                                log(`${target.name} destroyed!`);
+                            }
+                            if (unit.defense <= 0) {
+                                const index = gameState.opponent.field.indexOf(unit);
+                                gameState.opponent.field.splice(index, 1);
+                                log(`${unit.name} destroyed!`);
+                            }
+                        } else {
+                            gameState.player.life -= unit.attack;
+                            log(`Opponent's ${unit.name} attacks directly for ${unit.attack} damage!`);
+                        }
+                    });
+                    
+                    updateUI();
+                    checkWinCondition();
+                    
+                    setTimeout(() => {
+                        gameState.turn = 'player';
+                        startTurn('player');
+                    }, 1000);
+                }, 1000);
+            }, 1000);
+        }
+
+        function checkWinCondition() {
+            if (gameState.player.life <= 0) {
+                endGame('opponent', 'Your life reached 0!');
+            } else if (gameState.opponent.life <= 0) {
+                endGame('player', 'Opponent life reached 0!');
+            }
+        }
+
+        function endGame(winner, reason) {
+            gameState.gameStarted = false;
+            document.getElementById('end-turn-btn').disabled = true;
+            
+            const message = winner === 'player' ? 
+                `🎉 VICTORY! ${reason}` : 
+                `💀 DEFEAT! ${reason}`;
+            
+            updateStatus(message);
+            log(`=== GAME OVER ===`);
+            log(message);
+        }
+
+        function resetGame() {
+            gameState.gameStarted = false;
+            document.getElementById('end-turn-btn').disabled = true;
+            document.getElementById('player-hand').innerHTML = '';
+            document.getElementById('player-field').innerHTML = '';
+            document.getElementById('opponent-field').innerHTML = '';
+            updateStatus('Click "Start Game" to begin a new battle!');
+            log('Game reset');
+        }
+
+        function updateUI() {
+            // Update life and resources
+            document.getElementById('player-life').textContent = gameState.player.life;
+            document.getElementById('opponent-life').textContent = gameState.opponent.life;
+            document.getElementById('player-resources').textContent = gameState.player.resources;
+            document.getElementById('opponent-resources').textContent = gameState.opponent.resources;
+            document.getElementById('deck-count').textContent = gameState.player.deck.length;
+            document.getElementById('opponent-hand-count').textContent = gameState.opponent.hand.length;
+            
+            // Render player hand
+            const handZone = document.getElementById('player-hand');
+            handZone.innerHTML = '';
+            gameState.player.hand.forEach((card, index) => {
+                handZone.appendChild(createCardElement(card, index, 'hand'));
+            });
+            
+            // Render player field
+            const playerField = document.getElementById('player-field');
+            playerField.innerHTML = '';
+            gameState.player.field.forEach((card, index) => {
+                playerField.appendChild(createCardElement(card, index, 'field'));
+            });
+            
+            // Render opponent field
+            const opponentField = document.getElementById('opponent-field');
+            opponentField.innerHTML = '';
+            gameState.opponent.field.forEach((card, index) => {
+                opponentField.appendChild(createCardElement(card, index, 'opponent-field'));
+            });
+        }
+
+        function createCardElement(card, index, zone) {
+            const cardEl = document.createElement('div');
+            cardEl.className = `card ${card.type}`;
+            
+            let statsHTML = '';
+            if (card.type === 'unit') {
+                statsHTML = `
+                    <div class="card-stats">
+                        <span class="stat attack">⚔️${card.attack}</span>
+                        <span class="stat defense">🛡️${card.defense}</span>
+                    </div>
+                `;
+            }
+            
+            cardEl.innerHTML = `
+                <div class="card-cost">${card.cost}</div>
+                <div class="card-name">${card.name}</div>
+                <div class="card-image">${getCardIcon(card.type)}</div>
+                ${statsHTML}
+                <div class="card-ability">${card.abilities ? card.abilities[0] : ''}</div>
+            `;
+            
+            if (zone === 'hand') {
+                cardEl.onclick = () => playCard(index);
+            }
+            
+            return cardEl;
+        }
+
+        function getCardIcon(type) {
+            const icons = {
+                'unit': '👤',
+                'spell': '✨',
+                'equipment': '⚔️',
+                'hero': '👑'
+            };
+            return icons[type] || '🃏';
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            log('Arena initialized. Waiting for players...');
+        });
+    </script>
+</body>
+</html>
