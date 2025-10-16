@@ -4,6 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ShineChain Holodeck - Gateway Portal</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Enter the ShineChain Holodeck - Gateway to the Narrative Multiverse. Explore ZIRAA's saga, interactive experiences, and the living story ecosystem.">
+    <meta name="keywords" content="ShineChain, Holodeck, ZIRAA, interactive fiction, narrative games, blockchain storytelling, Web3 literature">
+    <meta name="author" content="ShineChain Collective">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph Tags -->
+    <meta property="og:title" content="ShineChain Holodeck - Gateway Portal">
+    <meta property="og:description" content="Gateway to the Narrative Multiverse. Explore interactive stories, games, and experiences in the ShineChain ecosystem.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://ziddi3.github.io/ShineChain-Mainframe/">
+    <meta property="og:site_name" content="ShineChain Holodeck">
+    
+    <!-- Twitter Card Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="ShineChain Holodeck - Gateway Portal">
+    <meta name="twitter:description" content="Gateway to the Narrative Multiverse. Explore interactive stories and experiences.">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌞</text></svg>">
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="library.html" as="document">
+    <link rel="preload" href="hypercube.html" as="document">
+    
+    <!-- DNS prefetch for external resources -->
+    <link rel="dns-prefetch" href="//fonts.googleapis.com">
+    
+    <!-- Critical CSS inline for faster rendering -->
     <style>
         * {
             margin: 0;
@@ -149,6 +179,101 @@
             font-size: 0.8rem;
         }
 
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 2px solid #00ffff;
+            border-radius: 15px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            animation: modalAppear 0.3s ease-out;
+        }
+
+        .modal-title {
+            color: #ffd700;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .modal-description {
+            color: #e0e0e0;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+
+        .modal-close {
+            background: linear-gradient(45deg, #00ffff, #0080ff);
+            color: #000;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 255, 0.3);
+        }
+
+        @keyframes modalAppear {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        .loading-indicator {
+            display: none;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 255, 255, 0.1);
+            border: 2px solid #00ffff;
+            border-radius: 10px;
+            padding: 1rem;
+            color: #00ffff;
+            z-index: 999;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #00ffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+            margin-right: 0.5rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
         @media (max-width: 768px) {
             .holodeck-title {
                 font-size: 2rem;
@@ -160,6 +285,11 @@
             }
             
             .portal-card {
+                padding: 1.5rem;
+            }
+
+            .modal-content {
+                width: 95%;
                 padding: 1.5rem;
             }
         }
@@ -223,7 +353,7 @@
             </div>
 
             <!-- Tarot Reader Portal -->
-            <div class="portal-card" onclick="alert('Tarot Reader coming soon!')">
+            <div class="portal-card" onclick="showComingSoon('Tarot Reader', 'Divine guidance through mystical card readings is being crafted by our narrative architects.')">
                 <div class="status-indicator maintenance"></div>
                 <div class="portal-icon">🔮</div>
                 <h3 class="portal-title">Tarot Reader</h3>
@@ -231,7 +361,7 @@
             </div>
 
             <!-- Murmur Box Portal -->
-            <div class="portal-card" onclick="alert('Murmur Box coming soon!')">
+            <div class="portal-card" onclick="showComingSoon('Murmur Box', 'The whispers and signals from across the narrative network are being tuned for your listening experience.')">
                 <div class="status-indicator maintenance"></div>
                 <div class="portal-icon">📻</div>
                 <h3 class="portal-title">Murmur Box</h3>
@@ -239,7 +369,7 @@
             </div>
 
             <!-- Card Battle Arena Portal -->
-            <div class="portal-card" onclick="alert('Card Battle Arena coming soon!')">
+            <div class="portal-card" onclick="showComingSoon('Card Battle Arena', 'Epic multiplayer battles are under construction. The arena will open soon for warriors of the ShineChain.')">
                 <div class="status-indicator offline"></div>
                 <div class="portal-icon">⚔️</div>
                 <h3 class="portal-title">Card Battle Arena</h3>
@@ -248,24 +378,147 @@
         </div>
 
         <footer class="footer">
-            <p>ShineChain Holodeck v1.0 | "The Shine Chain vibrates with pure defiance" ✨</p>
+            <p>ShineChain Holodeck v1.1 | "The Shine Chain vibrates with pure defiance" ✨</p>
         </footer>
     </div>
 
+    <!-- Modal Dialog -->
+    <div id="modal-overlay" class="modal-overlay" onclick="closeModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <h3 id="modal-title" class="modal-title"></h3>
+            <p id="modal-description" class="modal-description"></p>
+            <button class="modal-close" onclick="closeModal()">Understood</button>
+        </div>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div id="loading-indicator" class="loading-indicator">
+        <div class="loading-spinner"></div>
+        <span>Loading experience...</span>
+    </div>
+
     <script>
-        // Add some interactive effects
+        // Enhanced interactive effects and modal system
         document.addEventListener('DOMContentLoaded', function() {
             const cards = document.querySelectorAll('.portal-card');
             
+            // Enhanced card interactions
             cards.forEach(card => {
                 card.addEventListener('mouseenter', function() {
                     this.style.transform = 'translateY(-10px) scale(1.02)';
+                    this.style.boxShadow = '0 20px 40px rgba(0, 255, 255, 0.3)';
                 });
                 
                 card.addEventListener('mouseleave', function() {
                     this.style.transform = 'translateY(0) scale(1)';
+                    this.style.boxShadow = 'none';
+                });
+
+                // Add click feedback
+                card.addEventListener('mousedown', function() {
+                    this.style.transform = 'translateY(-8px) scale(0.98)';
+                });
+
+                card.addEventListener('mouseup', function() {
+                    this.style.transform = 'translateY(-10px) scale(1.02)';
                 });
             });
+
+            // Add keyboard navigation
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeModal();
+                }
+            });
+
+            // Preload critical resources
+            preloadResources();
+        });
+
+        // Modal system
+        function showComingSoon(title, description) {
+            const modal = document.getElementById('modal-overlay');
+            const modalTitle = document.getElementById('modal-title');
+            const modalDescription = document.getElementById('modal-description');
+            
+            modalTitle.textContent = title + ' - Coming Soon';
+            modalDescription.textContent = description;
+            
+            modal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+            
+            // Add subtle animation
+            setTimeout(() => {
+                modal.style.opacity = '1';
+            }, 10);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('modal-overlay');
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // Loading indicator system
+        function showLoading() {
+            document.getElementById('loading-indicator').style.display = 'block';
+        }
+
+        function hideLoading() {
+            document.getElementById('loading-indicator').style.display = 'none';
+        }
+
+        // Enhanced navigation with loading states
+        function navigateToPortal(url) {
+            showLoading();
+            
+            // Simulate loading time for better UX
+            setTimeout(() => {
+                window.location.href = url;
+            }, 300);
+        }
+
+        // Preload critical resources
+        function preloadResources() {
+            const criticalPages = [
+                'library.html',
+                'hypercube.html',
+                'launcher.html',
+                'echo-dome.html'
+            ];
+
+            criticalPages.forEach(page => {
+                const link = document.createElement('link');
+                link.rel = 'prefetch';
+                link.href = page;
+                document.head.appendChild(link);
+            });
+        }
+
+        // Performance monitoring
+        window.addEventListener('load', function() {
+            // Log performance metrics
+            const perfData = performance.timing;
+            const loadTime = perfData.loadEventEnd - perfData.navigationStart;
+            
+            if (loadTime > 3000) {
+                console.warn('Page load time exceeded 3 seconds:', loadTime + 'ms');
+            }
+        });
+
+        // Error handling
+        window.addEventListener('error', function(e) {
+            console.error('JavaScript error:', e.error);
+            // Could send to analytics service
+        });
+
+        // Connection status monitoring
+        window.addEventListener('online', function() {
+            hideLoading();
+        });
+
+        window.addEventListener('offline', function() {
+            showComingSoon('Connection Lost', 'You appear to be offline. Some features may not be available until your connection is restored.');
         });
     </script>
 </body>
