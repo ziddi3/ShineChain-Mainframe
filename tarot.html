@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tarot Reader - ShineChain Divination</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Tarot Reader - Divine guidance through the ShineChain using mystical card readings. Explore past, present, and future through the ancient art of tarot.">
+    <meta name="keywords" content="Tarot, divination, ShineChain, card reading, mystical guidance">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: radial-gradient(circle at center, #1a0a2e 0%, #0a0a1e 50%, #000000 100%);
+            font-family: 'Georgia', serif;
+            color: #ffd700;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .tarot-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem;
+        }
+
+        .title {
+            font-size: 3rem;
+            color: #ffd700;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+            margin-bottom: 1rem;
+            animation: glow 3s ease-in-out infinite alternate;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.8;
+            color: #00ffff;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 20px rgba(255, 215, 0, 0.5); }
+            to { text-shadow: 0 0 30px rgba(255, 215, 0, 0.8), 0 0 40px rgba(255, 215, 0, 0.6); }
+        }
+
+        .reading-section {
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid #ffd700;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .question-input {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(255, 215, 0, 0.1);
+            border: 2px solid #ffd700;
+            border-radius: 10px;
+            color: #ffd700;
+            font-size: 1.1rem;
+            font-family: 'Georgia', serif;
+            margin-bottom: 1.5rem;
+        }
+
+        .question-input::placeholder {
+            color: rgba(255, 215, 0, 0.5);
+        }
+
+        .cards-display {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .card-slot {
+            position: relative;
+            aspect-ratio: 2/3;
+            perspective: 1000px;
+        }
+
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.8s;
+            transform-style: preserve-3d;
+        }
+
+        .card-slot.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+
+        .card-back {
+            background: linear-gradient(135deg, #1a0a2e 0%, #2d1b4e 100%);
+            border: 3px solid #ffd700;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+        }
+
+        .card-back-pattern {
+            width: 80%;
+            height: 80%;
+            background: radial-gradient(circle, #ffd700 2px, transparent 2px);
+            background-size: 20px 20px;
+            opacity: 0.3;
+        }
+
+        .card-front {
+            background: linear-gradient(135deg, #2d1b4e 0%, #1a0a2e 100%);
+            border: 3px solid #00ffff;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+            transform: rotateY(180deg);
+        }
+
+        .card-image {
+            width: 100%;
+            height: 60%;
+            background: rgba(255, 215, 0, 0.1);
+            border: 2px solid #ffd700;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .card-name {
+            font-size: 1.3rem;
+            color: #ffd700;
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-position {
+            font-size: 0.9rem;
+            color: #00ffff;
+            text-align: center;
+            opacity: 0.8;
+        }
+
+        .card-meaning {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #00ffff;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .meaning-title {
+            font-size: 1.2rem;
+            color: #ffd700;
+            margin-bottom: 1rem;
+        }
+
+        .meaning-text {
+            color: #e0e0e0;
+            line-height: 1.8;
+            font-size: 1rem;
+        }
+
+        .keywords {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .keyword {
+            background: rgba(0, 255, 255, 0.2);
+            border: 1px solid #00ffff;
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            color: #00ffff;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin: 2rem 0;
+        }
+
+        .button {
+            padding: 1rem 2rem;
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            color: #000;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Georgia', serif;
+        }
+
+        .button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(255, 215, 0, 0.4);
+        }
+
+        .button.secondary {
+            background: linear-gradient(45deg, #00ffff, #00cccc);
+        }
+
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            padding: 0.8rem 1.5rem;
+            background: rgba(255, 215, 0, 0.2);
+            border: 2px solid #ffd700;
+            border-radius: 25px;
+            color: #ffd700;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 215, 0, 0.3);
+            transform: translateX(-5px);
+        }
+
+        .mystical-circle {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: 600px;
+            border: 2px solid rgba(255, 215, 0, 0.2);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: -1;
+            animation: rotate 60s linear infinite;
+        }
+
+        .mystical-circle::before,
+        .mystical-circle::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 2px solid rgba(0, 255, 255, 0.2);
+            border-radius: 50%;
+        }
+
+        .mystical-circle::before {
+            width: 80%;
+            height: 80%;
+        }
+
+        .mystical-circle::after {
+            width: 60%;
+            height: 60%;
+        }
+
+        @keyframes rotate {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #00ffff;
+            font-size: 1.2rem;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 215, 0, 0.3);
+            border-top-color: #ffd700;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2rem;
+            }
+
+            .cards-display {
+                grid-template-columns: 1fr;
+            }
+
+            .mystical-circle {
+                width: 300px;
+                height: 300px;
+            }
+        }
+    </style>
+<script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
+</head>
+<body>
+    <a href="index.html" class="back-button">← Back to Holodeck</a>
+    <div class="mystical-circle"></div>
+
+    <div class="tarot-container">
+        <header class="header">
+            <h1 class="title">🔮 Tarot Reader</h1>
+            <p class="subtitle">Divine Guidance Through the ShineChain</p>
+        </header>
+
+        <div class="reading-section">
+            <input type="text" 
+                   class="question-input" 
+                   id="question-input"
+                   placeholder="Focus your intention... What guidance do you seek?">
+            
+            <div class="controls">
+                <button class="button" onclick="drawCards()">Draw Cards</button>
+                <button class="button secondary" onclick="resetReading()">New Reading</button>
+            </div>
+
+            <div id="loading" class="loading" style="display: none;">
+                <div class="spinner"></div>
+                <p>Shuffling the cosmic deck...</p>
+            </div>
+
+            <div class="cards-display" id="cards-display">
+                <!-- Cards will be dynamically generated here -->
+            </div>
+
+            <div id="meanings-section">
+                <!-- Card meanings will be displayed here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let tarotData = null;
+        let drawnCards = [];
+        const positions = ['Past', 'Present', 'Future'];
+
+        // Load tarot data
+        fetch('data/tarot.json')
+            .then(response => response.json())
+            .then(data => {
+                tarotData = data;
+                console.log('Tarot data loaded:', tarotData.cards.length, 'cards');
+            })
+            .catch(error => {
+                console.error('Error loading tarot data:', error);
+                alert('Error loading tarot cards. Please refresh the page.');
+            });
+
+        function shuffleDeck() {
+            if (!tarotData) return [];
+            
+            const deck = [...tarotData.cards];
+            for (let i = deck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [deck[i], deck[j]] = [deck[j], deck[i]];
+            }
+            return deck;
+        }
+
+        function drawCards() {
+            if (!tarotData) {
+                alert('Tarot data is still loading. Please wait a moment.');
+                return;
+            }
+
+            const question = document.getElementById('question-input').value;
+            if (!question.trim()) {
+                alert('Please enter your question or intention first.');
+                return;
+            }
+
+            // Show loading
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('cards-display').innerHTML = '';
+            document.getElementById('meanings-section').innerHTML = '';
+
+            // Simulate shuffling delay
+            setTimeout(() => {
+                const shuffled = shuffleDeck();
+                drawnCards = shuffled.slice(0, 3);
+                
+                displayCards();
+                document.getElementById('loading').style.display = 'none';
+                
+                // Flip cards one by one
+                setTimeout(() => flipCard(0), 500);
+                setTimeout(() => flipCard(1), 1500);
+                setTimeout(() => flipCard(2), 2500);
+                setTimeout(() => displayMeanings(), 3500);
+            }, 1500);
+        }
+
+        function displayCards() {
+            const display = document.getElementById('cards-display');
+            
+            drawnCards.forEach((card, index) => {
+                const cardSlot = document.createElement('div');
+                cardSlot.className = 'card-slot';
+                cardSlot.id = `card-${index}`;
+                
+                cardSlot.innerHTML = `
+                    <div class="card-inner">
+                        <div class="card-face card-back">
+                            <div class="card-back-pattern"></div>
+                        </div>
+                        <div class="card-face card-front">
+                            <div class="card-image">🔮</div>
+                            <h3 class="card-name">${card.name}</h3>
+                            <p class="card-position">${positions[index]}</p>
+                        </div>
+                    </div>
+                `;
+                
+                display.appendChild(cardSlot);
+            });
+        }
+
+        function flipCard(index) {
+            const cardSlot = document.getElementById(`card-${index}`);
+            if (cardSlot) {
+                cardSlot.classList.add('flipped');
+            }
+        }
+
+        function displayMeanings() {
+            const section = document.getElementById('meanings-section');
+            
+            drawnCards.forEach((card, index) => {
+                const meaningDiv = document.createElement('div');
+                meaningDiv.className = 'card-meaning';
+                
+                meaningDiv.innerHTML = `
+                    <h3 class="meaning-title">${positions[index]}: ${card.name}</h3>
+                    <p class="meaning-text">${card.meaning}</p>
+                    <div class="keywords">
+                        ${card.keywords.map(kw => `<span class="keyword">${kw}</span>`).join('')}
+                    </div>
+                `;
+                
+                section.appendChild(meaningDiv);
+            });
+        }
+
+        function resetReading() {
+            document.getElementById('question-input').value = '';
+            document.getElementById('cards-display').innerHTML = '';
+            document.getElementById('meanings-section').innerHTML = '';
+            drawnCards = [];
+        }
+
+        // Keyboard shortcut
+        document.getElementById('question-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                drawCards();
+            }
+        });
+    </script>
+</body>
+</html>

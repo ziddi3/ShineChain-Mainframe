@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Murmur Box - ShineChain Signal Receiver</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Murmur Box - Listen to whispers and signals from across the ShineChain narrative network. Interactive audio experience with signal frequency tuning.">
+    <meta name="keywords" content="Murmur Box, ShineChain, audio experience, signal tuning, narrative sounds">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #0f0f1e 100%);
+            font-family: 'Courier New', monospace;
+            color: #00ffff;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .murmur-container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            height: 100vh;
+            gap: 0;
+        }
+
+        .playlist-panel {
+            background: rgba(0, 0, 0, 0.8);
+            border-right: 2px solid #00ffff;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+
+        .panel-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #00ffff;
+        }
+
+        .panel-title {
+            font-size: 1.5rem;
+            color: #ffd700;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+            margin-bottom: 0.5rem;
+        }
+
+        .panel-subtitle {
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
+        .murmur-item {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid #00ffff;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .murmur-item:hover {
+            background: rgba(0, 255, 255, 0.2);
+            transform: translateX(5px);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+        }
+
+        .murmur-item.active {
+            background: rgba(255, 215, 0, 0.2);
+            border-color: #ffd700;
+        }
+
+        .murmur-title {
+            font-size: 1rem;
+            color: #ffd700;
+            margin-bottom: 0.5rem;
+        }
+
+        .murmur-description {
+            font-size: 0.8rem;
+            opacity: 0.8;
+            line-height: 1.4;
+        }
+
+        .murmur-duration {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            font-size: 0.7rem;
+            color: #00ffff;
+        }
+
+        .visualizer-panel {
+            display: flex;
+            flex-direction: column;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .controls-section {
+            background: rgba(0, 0, 0, 0.8);
+            border-bottom: 2px solid #00ffff;
+            padding: 1.5rem;
+        }
+
+        .now-playing {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .now-playing-title {
+            font-size: 1.5rem;
+            color: #ffd700;
+            margin-bottom: 0.5rem;
+        }
+
+        .now-playing-description {
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+
+        .playback-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .control-button {
+            background: linear-gradient(45deg, #00ffff, #0080ff);
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .control-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+        }
+
+        .control-button.play-pause {
+            width: 60px;
+            height: 60px;
+            font-size: 2rem;
+        }
+
+        .frequency-control {
+            margin-bottom: 1rem;
+        }
+
+        .control-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #ffd700;
+            font-size: 0.9rem;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .slider {
+            flex: 1;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 8px;
+            background: rgba(0, 255, 255, 0.2);
+            border-radius: 5px;
+            outline: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #00ffff;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: #00ffff;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+
+        .slider-value {
+            min-width: 50px;
+            text-align: right;
+            color: #00ffff;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(0, 255, 255, 0.2);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ffff, #ffd700);
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        .time-display {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
+        .visualizer-canvas {
+            flex: 1;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            max-height: 400px;
+        }
+
+        .waveform-container {
+            position: absolute;
+            width: 80%;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+        }
+
+        .waveform-bar {
+            flex: 1;
+            background: linear-gradient(180deg, #00ffff, #0080ff);
+            border-radius: 2px;
+            transition: height 0.1s ease;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        }
+
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            padding: 0.8rem 1.5rem;
+            background: rgba(255, 215, 0, 0.2);
+            border: 2px solid #ffd700;
+            border-radius: 25px;
+            color: #ffd700;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 215, 0, 0.3);
+            transform: translateX(-5px);
+        }
+
+        .status-indicator {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #00ffff;
+            border-radius: 10px;
+            padding: 1rem;
+            font-size: 0.8rem;
+        }
+
+        .status-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #00ff00;
+            margin-right: 0.5rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        @media (max-width: 768px) {
+            .murmur-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr;
+            }
+
+            .playlist-panel {
+                max-height: 40vh;
+                border-right: none;
+                border-bottom: 2px solid #00ffff;
+            }
+        }
+    </style>
+<script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
+</head>
+<body>
+    <a href="index.html" class="back-button">← Back to Holodeck</a>
+
+    <div class="murmur-container">
+        <div class="playlist-panel">
+            <div class="panel-header">
+                <h1 class="panel-title">📻 Murmur Box</h1>
+                <p class="panel-subtitle">Signal Receiver v2.1</p>
+            </div>
+
+            <div id="playlist">
+                <!-- Murmur items will be dynamically loaded here -->
+            </div>
+        </div>
+
+        <div class="visualizer-panel">
+            <div class="controls-section">
+                <div class="now-playing">
+                    <h2 class="now-playing-title" id="current-title">Select a signal to begin</h2>
+                    <p class="now-playing-description" id="current-description">Choose from the signals on the left</p>
+                </div>
+
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+                <div class="time-display">
+                    <span id="current-time">0:00</span>
+                    <span id="total-time">0:00</span>
+                </div>
+
+                <div class="playback-controls">
+                    <button class="control-button" id="prev-button" title="Previous">⏮</button>
+                    <button class="control-button play-pause" id="play-pause-button" title="Play/Pause">▶</button>
+                    <button class="control-button" id="next-button" title="Next">⏭</button>
+                </div>
+
+                <div class="frequency-control">
+                    <label class="control-label">Signal Frequency Tuning</label>
+                    <div class="slider-container">
+                        <input type="range" class="slider" id="frequency-slider" min="0.5" max="2" step="0.1" value="1">
+                        <span class="slider-value" id="frequency-value">1.0x</span>
+                    </div>
+                </div>
+
+                <div class="frequency-control">
+                    <label class="control-label">Signal Strength (Volume)</label>
+                    <div class="slider-container">
+                        <input type="range" class="slider" id="volume-slider" min="0" max="100" step="1" value="70">
+                        <span class="slider-value" id="volume-value">70%</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="visualizer-canvas">
+                <div class="waveform-container" id="waveform">
+                    <!-- Waveform bars will be generated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="status-indicator">
+        <span class="status-dot"></span>
+        <span id="status-text">Ready to receive signals</span>
+    </div>
+
+    <script>
+        // Murmur Box Audio System
+        const murmurData = [
+            {
+                id: 1,
+                title: "Whisper of the Starseeds",
+                description: "Ancient echoes from the first generation of conscious seeds",
+                duration: "3:24",
+                frequency: "432 Hz",
+                // Placeholder: Will use actual audio file when uploaded
+                audioUrl: "assets/audio/whisper_starseeds.mp3"
+            },
+            {
+                id: 2,
+                title: "Signal from the Echo Dome",
+                description: "Resonant frequencies captured within ZIRAA's memory chamber",
+                duration: "4:12",
+                frequency: "528 Hz",
+                audioUrl: "assets/audio/echo_dome_signal.mp3"
+            },
+            {
+                id: 3,
+                title: "Murmurs of the Forgotten",
+                description: "Voices of those who came before, preserved in the ShineChain",
+                duration: "5:03",
+                frequency: "639 Hz",
+                audioUrl: "assets/audio/forgotten_murmurs.mp3"
+            },
+            {
+                id: 4,
+                title: "Harmony of the Network",
+                description: "The collective hum of all connected nodes in perfect synchronization",
+                duration: "6:18",
+                frequency: "741 Hz",
+                audioUrl: "assets/audio/network_harmony.mp3"
+            },
+            {
+                id: 5,
+                title: "Silence Between Signals",
+                description: "The profound quiet that exists in the spaces between transmissions",
+                duration: "2:45",
+                frequency: "852 Hz",
+                audioUrl: "assets/audio/silence_signals.mp3"
+            },
+            {
+                id: 6,
+                title: "Architects' Transmission",
+                description: "Encoded messages from the builders of the original ShineChain",
+                duration: "7:30",
+                frequency: "963 Hz",
+                audioUrl: "assets/audio/architects_transmission.mp3"
+            }
+        ];
+
+        let currentIndex = 0;
+        let isPlaying = false;
+        let audioContext = null;
+        let audioElement = new Audio();
+        let analyser = null;
+        let dataArray = null;
+        let animationId = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeAudioContext();
+            renderPlaylist();
+            setupControls();
+            generateWaveformBars();
+            updateStatus("System initialized - Ready to receive");
+        });
+
+        function initializeAudioContext() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                analyser.fftSize = 64;
+                
+                const source = audioContext.createMediaElementSource(audioElement);
+                source.connect(analyser);
+                analyser.connect(audioContext.destination);
+                
+                dataArray = new Uint8Array(analyser.frequencyBinCount);
+            } catch (e) {
+                console.warn('Web Audio API not supported:', e);
+                updateStatus("Audio system limited - basic playback only");
+            }
+        }
+
+        function renderPlaylist() {
+            const playlist = document.getElementById('playlist');
+            playlist.innerHTML = murmurData.map((murmur, index) => `
+                <div class="murmur-item ${index === currentIndex ? 'active' : ''}" 
+                     onclick="selectMurmur(${index})" 
+                     data-index="${index}">
+                    <span class="murmur-duration">${murmur.duration}</span>
+                    <h3 class="murmur-title">${murmur.title}</h3>
+                    <p class="murmur-description">${murmur.description}</p>
+                    <p class="murmur-description" style="margin-top: 0.5rem; color: #00ffff;">
+                        ${murmur.frequency}
+                    </p>
+                </div>
+            `).join('');
+        }
+
+        function selectMurmur(index) {
+            currentIndex = index;
+            const murmur = murmurData[index];
+            
+            // Update UI
+            document.getElementById('current-title').textContent = murmur.title;
+            document.getElementById('current-description').textContent = murmur.description;
+            
+            // Update active state
+            document.querySelectorAll('.murmur-item').forEach((item, i) => {
+                item.classList.toggle('active', i === index);
+            });
+            
+            // Load and play audio
+            loadAudio(murmur.audioUrl);
+            updateStatus(`Tuning to: ${murmur.title}`);
+        }
+
+        function loadAudio(url) {
+            // Check if audio file exists, otherwise use placeholder
+            audioElement.src = url;
+            
+            audioElement.addEventListener('loadedmetadata', function() {
+                document.getElementById('total-time').textContent = formatTime(audioElement.duration);
+            });
+            
+            audioElement.addEventListener('error', function() {
+                // Fallback: Generate tone if audio file doesn't exist
+                updateStatus("Audio file not found - generating placeholder tone");
+                generatePlaceholderTone();
+            });
+            
+            audioElement.addEventListener('timeupdate', updateProgress);
+            audioElement.addEventListener('ended', playNext);
+            
+            if (isPlaying) {
+                playAudio();
+            }
+        }
+
+        function generatePlaceholderTone() {
+            // Generate a simple tone as placeholder
+            if (!audioContext) return;
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = 432; // A4 note
+            gainNode.gain.value = 0.1;
+            
+            oscillator.start();
+            setTimeout(() => oscillator.stop(), 3000);
+        }
+
+        function setupControls() {
+            document.getElementById('play-pause-button').addEventListener('click', togglePlayPause);
+            document.getElementById('prev-button').addEventListener('click', playPrevious);
+            document.getElementById('next-button').addEventListener('click', playNext);
+            
+            document.getElementById('frequency-slider').addEventListener('input', function(e) {
+                const value = parseFloat(e.target.value);
+                audioElement.playbackRate = value;
+                document.getElementById('frequency-value').textContent = value.toFixed(1) + 'x';
+            });
+            
+            document.getElementById('volume-slider').addEventListener('input', function(e) {
+                const value = parseInt(e.target.value);
+                audioElement.volume = value / 100;
+                document.getElementById('volume-value').textContent = value + '%';
+            });
+            
+            // Set initial volume
+            audioElement.volume = 0.7;
+        }
+
+        function togglePlayPause() {
+            if (isPlaying) {
+                pauseAudio();
+            } else {
+                playAudio();
+            }
+        }
+
+        function playAudio() {
+            if (audioContext && audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+            
+            audioElement.play().then(() => {
+                isPlaying = true;
+                document.getElementById('play-pause-button').textContent = '⏸';
+                startVisualization();
+                updateStatus("Receiving signal...");
+            }).catch(e => {
+                console.error('Playback error:', e);
+                updateStatus("Playback error - check audio files");
+            });
+        }
+
+        function pauseAudio() {
+            audioElement.pause();
+            isPlaying = false;
+            document.getElementById('play-pause-button').textContent = '▶';
+            stopVisualization();
+            updateStatus("Signal paused");
+        }
+
+        function playNext() {
+            currentIndex = (currentIndex + 1) % murmurData.length;
+            selectMurmur(currentIndex);
+            if (isPlaying) {
+                playAudio();
+            }
+        }
+
+        function playPrevious() {
+            currentIndex = (currentIndex - 1 + murmurData.length) % murmurData.length;
+            selectMurmur(currentIndex);
+            if (isPlaying) {
+                playAudio();
+            }
+        }
+
+        function updateProgress() {
+            const progress = (audioElement.currentTime / audioElement.duration) * 100;
+            document.getElementById('progress-fill').style.width = progress + '%';
+            document.getElementById('current-time').textContent = formatTime(audioElement.currentTime);
+        }
+
+        function formatTime(seconds) {
+            if (isNaN(seconds)) return '0:00';
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function generateWaveformBars() {
+            const waveform = document.getElementById('waveform');
+            for (let i = 0; i < 32; i++) {
+                const bar = document.createElement('div');
+                bar.className = 'waveform-bar';
+                bar.style.height = '20px';
+                waveform.appendChild(bar);
+            }
+        }
+
+        function startVisualization() {
+            if (!analyser) return;
+            
+            function animate() {
+                animationId = requestAnimationFrame(animate);
+                
+                analyser.getByteFrequencyData(dataArray);
+                
+                const bars = document.querySelectorAll('.waveform-bar');
+                bars.forEach((bar, index) => {
+                    const value = dataArray[index * 2] || 0;
+                    const height = (value / 255) * 150 + 20;
+                    bar.style.height = height + 'px';
+                });
+            }
+            
+            animate();
+        }
+
+        function stopVisualization() {
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+            }
+        }
+
+        function updateStatus(message) {
+            document.getElementById('status-text').textContent = message;
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            switch(e.key) {
+                case ' ':
+                    e.preventDefault();
+                    togglePlayPause();
+                    break;
+                case 'ArrowRight':
+                    playNext();
+                    break;
+                case 'ArrowLeft':
+                    playPrevious();
+                    break;
+            }
+        });
+    </script>
+</body>
+</html>
