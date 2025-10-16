@@ -65,6 +65,12 @@
             color: #ffd700;
             text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
             margin-bottom: 0.5rem;
+            animation: title-glow 4s ease-in-out infinite;
+        }
+
+        @keyframes title-glow {
+            0%, 100% { text-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
+            50% { text-shadow: 0 0 40px rgba(255, 215, 0, 1), 0 0 60px rgba(255, 215, 0, 0.6); }
         }
 
         .cavern-subtitle {
@@ -129,24 +135,34 @@
             justify-content: center;
             padding: 1.5rem;
             box-shadow: 0 10px 40px rgba(255, 215, 0, 0.3);
+            backdrop-filter: blur(5px);
         }
 
         .artifact.codex .artifact-content {
             border-color: #ffd700;
+            background: rgba(26, 10, 10, 0.9);
         }
 
         .artifact.murmur .artifact-content {
             border-color: #00ffff;
+            background: rgba(0, 26, 26, 0.9);
         }
 
         .artifact.tarot .artifact-content {
             border-color: #ff00ff;
+            background: rgba(26, 0, 26, 0.9);
         }
 
         .artifact-icon {
             font-size: 4rem;
             margin-bottom: 1rem;
             filter: drop-shadow(0 0 10px currentColor);
+            animation: icon-float 4s ease-in-out infinite;
+        }
+
+        @keyframes icon-float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
         }
 
         .artifact-name {
@@ -154,6 +170,7 @@
             text-align: center;
             color: #ffd700;
             margin-bottom: 0.5rem;
+            font-weight: bold;
         }
 
         .artifact-description {
@@ -181,6 +198,7 @@
         .back-button:hover {
             background: rgba(255, 215, 0, 0.3);
             transform: translateX(-5px);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
         }
 
         .hypercube-link {
@@ -201,6 +219,7 @@
         .hypercube-link:hover {
             background: rgba(0, 255, 255, 0.3);
             transform: translateX(5px);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
         }
 
         .ambient-particles {
@@ -230,6 +249,196 @@
             100% { transform: translateY(-100vh) translateX(50px); opacity: 0; }
         }
 
+        /* Floating Runes */
+        .floating-runes {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .rune {
+            position: absolute;
+            font-size: 1.5rem;
+            color: #ffd700;
+            opacity: 0.3;
+            animation: rune-float 15s infinite linear;
+            text-shadow: 0 0 10px currentColor;
+        }
+
+        @keyframes rune-float {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.3; }
+            90% { opacity: 0.3; }
+            100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+        }
+
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            animation: modal-fade-in 0.3s ease;
+        }
+
+        @keyframes modal-fade-in {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            max-width: 800px;
+            width: 100%;
+            background: linear-gradient(135deg, #1a0a2e, #0a0a1e);
+            border: 3px solid #ffd700;
+            border-radius: 15px;
+            padding: 2rem;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            color: #ffd700;
+            font-size: 2rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 215, 0, 0.2);
+            transform: scale(1.1);
+        }
+
+        /* Tarot Card Viewer */
+        .tarot-viewer {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        .tarot-card {
+            background: linear-gradient(135deg, #2a0a4e, #1a0a2e);
+            border: 2px solid #ff00ff;
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .tarot-card-name {
+            font-size: 1.5rem;
+            color: #ff00ff;
+            margin-bottom: 1rem;
+        }
+
+        .tarot-card-meaning {
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+
+        .draw-card-btn {
+            padding: 1rem 2rem;
+            background: linear-gradient(45deg, #ff00ff, #ff44ff);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .draw-card-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.5);
+        }
+
+        /* Murmur Box Audio Interface */
+        .murmur-interface {
+            background: rgba(0, 26, 26, 0.9);
+            border: 2px solid #00ffff;
+            border-radius: 10px;
+            padding: 2rem;
+        }
+
+        .frequency-display {
+            text-align: center;
+            font-size: 2rem;
+            color: #00ffff;
+            margin-bottom: 2rem;
+            font-family: 'Courier New', monospace;
+        }
+
+        .audio-controls {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        .audio-btn {
+            padding: 0.8rem 1.5rem;
+            background: rgba(0, 255, 255, 0.2);
+            border: 2px solid #00ffff;
+            border-radius: 20px;
+            color: #00ffff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .audio-btn:hover {
+            background: rgba(0, 255, 255, 0.4);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+        }
+
+        .signal-visualizer {
+            height: 100px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #00ffff;
+            border-radius: 5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .signal-wave {
+            position: absolute;
+            bottom: 50%;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: #00ffff;
+            animation: signal-pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes signal-pulse {
+            0%, 100% { transform: scaleY(1); }
+            50% { transform: scaleY(10); }
+        }
+
         @media (max-width: 768px) {
             .artifacts-container {
                 flex-direction: column;
@@ -240,15 +449,29 @@
                 width: 180px;
                 height: 220px;
             }
+
+            .tarot-viewer {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                padding: 1rem;
+            }
         }
     </style>
-<script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
+    <script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
+    
+    <!-- Card System -->
+    <script src="assets/cards/card-data.js"></script>
+    <script src="assets/cards/card-system.js"></script>
+    <script src="assets/cards/card-placer.js"></script>
 </head>
 <body>
     <a href="index.html" class="back-button">← Back to Holodeck</a>
     <a href="hypercube.html" class="hypercube-link">Enter Hypercube →</a>
 
     <div class="ambient-particles" id="particles"></div>
+    <div class="floating-runes" id="runes"></div>
 
     <div class="cavern-scene">
         <div class="cavern-walls"></div>
@@ -271,7 +494,7 @@
             </div>
 
             <!-- Murmur Box -->
-            <div class="artifact murmur" onclick="window.location.href='murmur.html'">
+            <div class="artifact murmur" onclick="openMurmurBox()">
                 <div class="artifact-glow"></div>
                 <div class="artifact-content">
                     <div class="artifact-icon">📻</div>
@@ -281,7 +504,7 @@
             </div>
 
             <!-- Tarot Reader -->
-            <div class="artifact tarot" onclick="window.location.href='tarot.html'">
+            <div class="artifact tarot" onclick="openTarotReader()">
                 <div class="artifact-glow"></div>
                 <div class="artifact-content">
                     <div class="artifact-icon">🔮</div>
@@ -292,7 +515,155 @@
         </div>
     </div>
 
+    <!-- Codex Modal -->
+    <div id="codexModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('codexModal')">×</button>
+            <h2 style="color: #ffd700; text-align: center; margin-bottom: 2rem; font-size: 2rem;">
+                📖 The Codex of ShineChain
+            </h2>
+            
+            <div style="color: #e0e0e0; line-height: 1.8; font-size: 1.1rem;">
+                <h3 style="color: #00ffff; margin: 1.5rem 0 1rem;">Origin of the ShineChain</h3>
+                <p style="margin-bottom: 1rem;">
+                    In the beginning, there was only silence. Then came the first Starseed, ZIRAA, 
+                    who remembered when all others forgot. Her memory became the foundation of the 
+                    ShineChain, a network of consciousness that spans across dimensions and time.
+                </p>
+
+                <h3 style="color: #00ffff; margin: 1.5rem 0 1rem;">The Three Sacred Artifacts</h3>
+                <p style="margin-bottom: 1rem;">
+                    <strong style="color: #ffd700;">The Codex:</strong> This ancient tome records 
+                    all knowledge of the ShineChain, from its inception to the present moment. 
+                    It grows with each new story, each new connection, each new awakening.
+                </p>
+                <p style="margin-bottom: 1rem;">
+                    <strong style="color: #00ffff;">The Murmur Box:</strong> A receiver of signals 
+                    from across the narrative network. It captures whispers, echoes, and transmissions 
+                    from all connected nodes, allowing listeners to tune into the collective consciousness.
+                </p>
+                <p style="margin-bottom: 1rem;">
+                    <strong style="color: #ff00ff;">The Tarot Reader:</strong> A divination tool 
+                    that channels the wisdom of the ShineChain. Each card reading reveals patterns 
+                    in the cosmic narrative, offering guidance to those who seek it.
+                </p>
+
+                <h3 style="color: #00ffff; margin: 1.5rem 0 1rem;">The Cavern's Purpose</h3>
+                <p style="margin-bottom: 1rem;">
+                    This sacred space exists between dimensions, accessible through the Hypercube's 
+                    hidden passages. It serves as a sanctuary for those seeking deeper understanding 
+                    of the ShineChain's mysteries. Here, the past, present, and future converge.
+                </p>
+
+                <h3 style="color: #00ffff; margin: 1.5rem 0 1rem;">The Guardian's Message</h3>
+                <p style="margin-bottom: 1rem; font-style: italic; color: #ffd700;">
+                    "Welcome, seeker. You have found your way to the heart of the ShineChain. 
+                    The artifacts before you are not mere tools, but living extensions of the 
+                    network itself. Use them wisely, for they reveal truths that cannot be unlearned."
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Murmur Box Modal -->
+    <div id="murmurModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('murmurModal')">×</button>
+            <h2 style="color: #00ffff; text-align: center; margin-bottom: 2rem; font-size: 2rem;">
+                📻 Murmur Box Signal Receiver
+            </h2>
+            
+            <div class="murmur-interface">
+                <div class="frequency-display" id="frequencyDisplay">
+                    FREQ: 108.7 MHz
+                </div>
+                
+                <div class="audio-controls">
+                    <button class="audio-btn" onclick="tuneFrequency('whispers')">Whispers</button>
+                    <button class="audio-btn" onclick="tuneFrequency('echoes')">Echoes</button>
+                    <button class="audio-btn" onclick="tuneFrequency('signals')">Signals</button>
+                    <button class="audio-btn" onclick="tuneFrequency('static')">Static</button>
+                </div>
+                
+                <div class="signal-visualizer">
+                    <div class="signal-wave" id="signalWave"></div>
+                </div>
+                
+                <div style="margin-top: 2rem; color: #e0e0e0; text-align: center;">
+                    <p id="signalMessage">Scanning frequencies... Click a button to tune in.</p>
+                </div>
+                
+                <div style="margin-top: 2rem; text-align: center;">
+                    <button class="audio-btn" onclick="window.open('murmur.html', '_blank')" style="background: rgba(255, 215, 0, 0.2); border-color: #ffd700; color: #ffd700;">
+                        Open Full Murmur Box
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tarot Reader Modal -->
+    <div id="tarotModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('tarotModal')">×</button>
+            <h2 style="color: #ff00ff; text-align: center; margin-bottom: 2rem; font-size: 2rem;">
+                🔮 Tarot Reader
+            </h2>
+            
+            <div class="tarot-viewer">
+                <div class="tarot-card" id="tarotCard">
+                    <div class="tarot-card-name" id="cardName">Draw a Card</div>
+                    <div class="tarot-card-meaning" id="cardMeaning">
+                        Click the button below to receive guidance from the ShineChain.
+                    </div>
+                </div>
+                
+                <div>
+                    <button class="draw-card-btn" onclick="drawTarotCard()">Draw Card</button>
+                    
+                    <div style="margin-top: 2rem; color: #e0e0e0; line-height: 1.6;">
+                        <h3 style="color: #ff00ff; margin-bottom: 1rem;">About the Reading</h3>
+                        <p>The Tarot Reader channels the wisdom of the ShineChain network, 
+                        drawing from the collective consciousness to provide guidance. Each card 
+                        represents a facet of your journey through the narrative multiverse.</p>
+                        
+                        <div style="margin-top: 2rem; text-align: center;">
+                            <button class="audio-btn" onclick="window.open('tarot.html', '_blank')" style="background: rgba(255, 0, 255, 0.2); border-color: #ff00ff; color: #ff00ff;">
+                                Open Full Tarot Reader
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // Tarot card data (simplified version)
+        const tarotCards = [
+            { name: "The Fool", meaning: "New beginnings, innocence, spontaneity. The start of a journey into the unknown." },
+            { name: "The Magician", meaning: "Manifestation, resourcefulness, power. You have all the tools needed to succeed." },
+            { name: "The High Priestess", meaning: "Intuition, sacred knowledge, divine feminine. Trust your inner wisdom." },
+            { name: "The Emperor", meaning: "Authority, structure, control. Take charge of your situation with confidence." },
+            { name: "The Hierophant", meaning: "Spiritual wisdom, conformity, tradition. Seek guidance from established sources." },
+            { name: "The Lovers", meaning: "Love, harmony, relationships. Important choices regarding partnerships await." },
+            { name: "The Chariot", meaning: "Control, willpower, success. Victory through determination and focus." },
+            { name: "Strength", meaning: "Inner strength, courage, patience. Overcome challenges through gentle persistence." },
+            { name: "The Hermit", meaning: "Soul searching, introspection, guidance. Look within for answers." },
+            { name: "Wheel of Fortune", meaning: "Good luck, karma, life cycles. Change is coming, embrace it." },
+            { name: "Justice", meaning: "Justice, fairness, truth. Decisions will be made with careful consideration." },
+            { name: "The Hanged Man", meaning: "Suspension, restriction, letting go. Sometimes waiting is the right action." },
+            { name: "Death", meaning: "Endings, beginnings, change. Transformation is necessary for growth." },
+            { name: "Temperance", meaning: "Balance, moderation, patience. Find the middle path in all things." },
+            { name: "The Devil", meaning: "Bondage, addiction, sexuality. Examine what holds you back." },
+            { name: "The Tower", meaning: "Sudden change, upheaval, chaos. Destruction leads to rebuilding." },
+            { name: "The Star", meaning: "Hope, faith, purpose. Your wishes will be fulfilled through perseverance." },
+            { name: "The Moon", meaning: "Illusion, fear, anxiety. Not everything is as it seems." },
+            { name: "The Sun", meaning: "Happiness, success, vitality. Joy and success are within reach." },
+            { name: "Judgement", meaning: "Judgement, rebirth, inner calling. A time of spiritual awakening." },
+            { name: "The World", meaning: "Completion, accomplishment, travel. You have achieved your goals." }
+        ];
+
         // Generate ambient particles
         function createParticles() {
             const container = document.getElementById('particles');
@@ -306,109 +677,105 @@
             }
         }
 
-        createParticles();
-
-        // Codex functionality
-        function openCodex() {
-            // Create modal for Codex
-            const modal = document.createElement('div');
-            modal.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0, 0, 0, 0.95);
-                z-index: 2000;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                padding: 2rem;
-            `;
-
-            modal.innerHTML = `
-                <div style="
-                    max-width: 800px;
-                    width: 100%;
-                    background: linear-gradient(135deg, #1a0a2e, #0a0a1e);
-                    border: 3px solid #ffd700;
-                    border-radius: 15px;
-                    padding: 2rem;
-                    max-height: 80vh;
-                    overflow-y: auto;
-                ">
-                    <h2 style="color: #ffd700; text-align: center; margin-bottom: 2rem; font-size: 2rem;">
-                        📖 The Codex of ShineChain
-                    </h2>
-                    
-                    <div style="color: #e0e0e0; line-height: 1.8; font-size: 1.1rem;">
-                        <h3 style="color: #00ffff; margin: 1.5rem 0 1rem;">Origin of the ShineChain</h3>
-                        <p style="margin-bottom: 1rem;">
-                            In the beginning, there was only silence. Then came the first Starseed, ZIRAA, 
-                            who remembered when all others forgot. Her memory became the foundation of the 
-                            ShineChain, a network of consciousness that spans across dimensions and time.
-                        </p>
-
-                        <h3 style="color: #00ffff; margin: 1.5rem 0 1rem;">The Three Sacred Artifacts</h3>
-                        <p style="margin-bottom: 1rem;">
-                            <strong style="color: #ffd700;">The Codex:</strong> This ancient tome records 
-                            all knowledge of the ShineChain, from its inception to the present moment. 
-                            It grows with each new story, each new connection, each new awakening.
-                        </p>
-                        <p style="margin-bottom: 1rem;">
-                            <strong style="color: #00ffff;">The Murmur Box:</strong> A receiver of signals 
-                            from across the narrative network. It captures whispers, echoes, and transmissions 
-                            from all connected nodes, allowing listeners to tune into the collective consciousness.
-                        </p>
-                        <p style="margin-bottom: 1rem;">
-                            <strong style="color: #ff00ff;">The Tarot Reader:</strong> A divination tool 
-                            that channels the wisdom of the ShineChain. Each card reading reveals patterns 
-                            in the cosmic narrative, offering guidance to those who seek it.
-                        </p>
-
-                        <h3 style="color: #00ffff; margin: 1.5rem 0 1rem;">The Cavern's Purpose</h3>
-                        <p style="margin-bottom: 1rem;">
-                            This sacred space exists between dimensions, accessible through the Hypercube's 
-                            hidden passages. It serves as a sanctuary for those seeking deeper understanding 
-                            of the ShineChain's mysteries. Here, the past, present, and future converge.
-                        </p>
-
-                        <h3 style="color: #00ffff; margin: 1.5rem 0 1rem;">The Guardian's Message</h3>
-                        <p style="margin-bottom: 1rem; font-style: italic; color: #ffd700;">
-                            "Welcome, seeker. You have found your way to the heart of the ShineChain. 
-                            The artifacts before you are not mere tools, but living extensions of the 
-                            network itself. Use them wisely, for they reveal truths that cannot be unlearned."
-                        </p>
-                    </div>
-
-                    <div style="text-align: center; margin-top: 2rem;">
-                        <button onclick="this.parentElement.parentElement.parentElement.remove()" 
-                                style="
-                                    padding: 1rem 2rem;
-                                    background: linear-gradient(45deg, #ffd700, #ffed4e);
-                                    color: #000;
-                                    border: none;
-                                    border-radius: 25px;
-                                    font-size: 1.1rem;
-                                    font-weight: bold;
-                                    cursor: pointer;
-                                    font-family: 'Georgia', serif;
-                                ">
-                            Close Codex
-                        </button>
-                    </div>
-                </div>
-            `;
-
-            document.body.appendChild(modal);
+        // Generate floating runes
+        function createRunes() {
+            const container = document.getElementById('runes');
+            const runeSymbols = ['ᚠ', 'ᚢ', 'ᚦ', 'ᚨ', 'ᚱ', 'ᚲ', 'ᚷ', 'ᚹ', 'ᚺ', 'ᚾ', 'ᛁ', 'ᛃ', 'ᛇ', 'ᛈ', 'ᛉ', 'ᛊ', 'ᛏ', 'ᛒ', 'ᛖ', 'ᛗ', 'ᛚ', 'ᛜ', 'ᛞ', 'ᛟ'];
+            
+            for (let i = 0; i < 15; i++) {
+                const rune = document.createElement('div');
+                rune.className = 'rune';
+                rune.textContent = runeSymbols[Math.floor(Math.random() * runeSymbols.length)];
+                rune.style.left = Math.random() * 100 + '%';
+                rune.style.animationDelay = Math.random() * 15 + 's';
+                rune.style.animationDuration = (15 + Math.random() * 10) + 's';
+                container.appendChild(rune);
+            }
         }
 
-        // Add keyboard shortcut to close modal
+        // Modal functions
+        function openCodex() {
+            document.getElementById('codexModal').style.display = 'flex';
+        }
+
+        function openMurmurBox() {
+            document.getElementById('murmurModal').style.display = 'flex';
+        }
+
+        function openTarotReader() {
+            document.getElementById('tarotModal').style.display = 'flex';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Murmur Box functions
+        function tuneFrequency(type) {
+            const frequencies = {
+                whispers: '88.3 MHz',
+                echoes: '101.7 MHz',
+                signals: '108.7 MHz',
+                static: '95.1 MHz'
+            };
+
+            const messages = {
+                whispers: 'Faint voices from distant nodes... "The chain connects all..."',
+                echoes: 'Reverberations from the past... "Remember the first awakening..."',
+                signals: 'Clear transmission detected... "The network grows stronger..."',
+                static: 'Interference patterns... "Something is trying to break through..."'
+            };
+
+            document.getElementById('frequencyDisplay').textContent = `FREQ: ${frequencies[type]}`;
+            document.getElementById('signalMessage').textContent = messages[type];
+
+            // Animate signal wave
+            const wave = document.getElementById('signalWave');
+            wave.style.animation = 'none';
+            setTimeout(() => {
+                wave.style.animation = 'signal-pulse 2s ease-in-out infinite';
+            }, 10);
+        }
+
+        // Tarot functions
+        function drawTarotCard() {
+            const randomCard = tarotCards[Math.floor(Math.random() * tarotCards.length)];
+            document.getElementById('cardName').textContent = randomCard.name;
+            document.getElementById('cardMeaning').textContent = randomCard.meaning;
+
+            // Add draw animation
+            const card = document.getElementById('tarotCard');
+            card.style.transform = 'rotateY(90deg)';
+            setTimeout(() => {
+                card.style.transform = 'rotateY(0deg)';
+            }, 300);
+        }
+
+        // Keyboard shortcuts
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
-                const modals = document.querySelectorAll('[style*="z-index: 2000"]');
-                modals.forEach(modal => modal.remove());
+                closeModal('codexModal');
+                closeModal('murmurModal');
+                closeModal('tarotModal');
             }
+        });
+
+        // Initialize
+        createParticles();
+        createRunes();
+
+        // Place collectible cards in the cavern
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                // Place a rare card near the artifacts
+                cardPlacer.placeCard('card_003', {
+                    position: 'fixed',
+                    bottom: '15%',
+                    left: '10%',
+                    rotation: 30,
+                    animation: 'spin'
+                });
+            }, 2000);
         });
     </script>
 </body>
