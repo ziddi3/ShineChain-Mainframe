@@ -469,5 +469,23 @@
             }
         }, 8000);
     </script>
+       
+       <!-- Card System -->
+       <script src="assets/cards/card-data.js"></script>
+       <script src="assets/cards/card-system.js"></script>
+       <script src="assets/cards/card-placer.js"></script>
+       
+       <script>
+           window.addEventListener("load", () => {
+               setTimeout(() => {
+                   cardPlacer.placeCard("card_007", {
+                       position: "fixed",
+                       bottom: "15%",
+                       right: "20%",
+                       rotation: -20
+                   });
+               }, 2000);
+           });
+       </script>
 </body>
 </html>

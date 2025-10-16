@@ -209,6 +209,8 @@
     <div class="controls">
         <button class="control-btn" onclick="pauseRotation()">⏸️ Pause</button>
         <button class="control-btn" onclick="enterStructure()">🚪 Enter Structure</button>
+           <button class="control-btn" onclick="window.location.href='library.html'">📚 Library</button>
+           <button class="control-btn" onclick="window.location.href='battle-arena.html'">⚔️ Battle Arena</button>
     </div>
 
     <script>
@@ -233,4 +235,32 @@
         }
     </script>
 </body>
-</html>
+</html>       
+       <!-- Card System -->
+       <script src="assets/cards/card-data.js"></script>
+       <script src="assets/cards/card-system.js"></script>
+       <script src="assets/cards/card-placer.js"></script>
+       
+       <script>
+           // Place collectible cards in the Holodeck
+           window.addEventListener('load', () => {
+               setTimeout(() => {
+                   // Place cards in corners and around the hypercube
+                   cardPlacer.placeCard('card_002', {
+                       position: 'fixed',
+                       top: '15%',
+                       right: '8%',
+                       rotation: 25,
+                       animation: 'float'
+                   });
+
+                   cardPlacer.placeCard('card_005', {
+                       position: 'fixed',
+                       bottom: '25%',
+                       left: '12%',
+                       rotation: -15,
+                       animation: 'pulse'
+                   });
+               }, 2000);
+           });
+       </script>

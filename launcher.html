@@ -627,5 +627,24 @@
         updateDisplay();
         createParticles();
     </script>
+       
+       <!-- Card System -->
+       <script src="assets/cards/card-data.js"></script>
+       <script src="assets/cards/card-system.js"></script>
+       <script src="assets/cards/card-placer.js"></script>
+       
+       <script>
+           // Place collectible cards in the launcher
+           window.addEventListener("load", () => {
+               setTimeout(() => {
+                   cardPlacer.placeCard("card_003", {
+                       position: "fixed",
+                       top: "20%",
+                       left: "15%",
+                       rotation: 10
+                   });
+               }, 2000);
+           });
+       </script>
 </body>
 </html>
