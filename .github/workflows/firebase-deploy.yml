@@ -1,41 +1,41 @@
-name: Deploy to Firebase Hosting
+"name: Deploy to Firebase Hosting"
 
 on:
   push:
     branches:
-      - main  # Deploy whenever code is pushed to main branch
-  workflow_dispatch:  # Allow manual triggering from GitHub UI
+     " - main  # Deploy whenever code is pushed to main branch"
+ " workflow_dispatch:  # Allow manual triggering from GitHub UI"
 
 jobs:
   deploy:
-    name: Deploy to Firebase
-    runs-on: ubuntu-latest
+    name: "Deploy to Firebase"
+    runs-on:" ubuntu-latest"
     
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        "uses: ""actions/checkout@v4"
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name:" Setup Node.j"s
+        uses: "actions/setup-node@v4"
         with:
-          node-version: '20'
+          node-version: "'20'"
 
       - name: Install Firebase CLI
         run: npm install -g firebase-tools
 
-      - name: Deploy to Firebase Hosting
-        run: firebase deploy --only hosting --token "${{ secrets.FIREBASE_TOKEN }}"
+      - name:" Deploy to Firebase Hosting"
+        run:" firebase deploy --only hosting --token "${{ secrets.FIREBASE_TOKEN }}""
         env:
-          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
-
-      - name: Deployment Success
+          FIREBASE_TOKEN: "${{ secrets.FIREBASE_TOKEN }}
+"
+      - name: "Deployment Success"
         if: success()
         run: |
           echo "✅ Successfully deployed to Firebase Hosting!"
           echo "🌐 Your site should be live shortly"
 
       - name: Deployment Failed
-        if: failure()
+       " if: failure()"
         run: |
           echo "❌ Deployment failed. Check the logs above for details."
           exit 1
