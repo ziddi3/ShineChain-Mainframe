@@ -1,4 +1,4 @@
-name: Ever-Deploy ShineChain Mainframe
+"name: Ever-Deploy ShineChain Mainframe
 on:
   push:
     branches: [ main ]
@@ -14,7 +14,7 @@ permissions:
 concurrency:
   group: "pages"
   cancel-in-progress: false
-
+"
 jobs:
   deploy:
     environment:
